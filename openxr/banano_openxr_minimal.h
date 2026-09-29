@@ -136,3 +136,28 @@ typedef struct BananoControllerPose {
 
 #define BANANO_THUMBSTICK_MIN -1.0f
 #define BANANO_THUMBSTICK_MAX 1.0f
+
+typedef struct BananoVRInputSnapshot {
+    uint64_t sequence;
+    int activeProfile;
+    int leftA;
+    int leftB;
+    int leftX;
+    int leftY;
+    int rightA;
+    int rightB;
+    int rightX;
+    int rightY;
+    float leftTrigger;
+    float rightTrigger;
+    float leftGrip;
+    float rightGrip;
+    float leftThumbstickX;
+    float leftThumbstickY;
+    float rightThumbstickX;
+    float rightThumbstickY;
+    int leftThumbstickClick;
+    int rightThumbstickClick;
+} BananoVRInputSnapshot;
+
+#define BANANO_INPUT_SNAPSHOT_VERSION 1
