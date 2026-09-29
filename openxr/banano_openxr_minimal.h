@@ -51,3 +51,9 @@ typedef struct XrNegotiateRuntimeRequest {
     XrVersion runtimeApiVersion;
     PFN_xrGetInstanceProcAddr getInstanceProcAddr;
 } XrNegotiateRuntimeRequest;
+
+typedef struct XrInstanceCreateInfo XrInstanceCreateInfo;
+typedef XrResult (BANANO_XR_CALL *PFN_xrCreateInstance)(
+    const XrInstanceCreateInfo* info, XrInstance* instance);
+
+#define XR_NULL_HANDLE nullptr
