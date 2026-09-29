@@ -1,4 +1,5 @@
 #include "vr_runtime.h"
+#include "vr_runtime.h"
 #include <windows.h>
 #include <vfw.h>
 #include <vector>
