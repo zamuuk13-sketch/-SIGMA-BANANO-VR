@@ -536,7 +536,7 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrCreateInstance") == 0) {
+    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateInstance") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoCreateInstance);
         return XR_SUCCESS;
