@@ -59,6 +59,71 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerCon
     g_leftController.connected = connected != 0;
 }
 
+enum class BananoInputKind {
+    FaceButton,
+    Trigger,
+    Grip,
+    Thumbstick,
+    ThumbstickClick,
+    ControllerPose,
+    HmdPose
+};
+
+struct BananoInputEvent {
+    int controller;
+    BananoInputKind kind;
+    int control;
+    float valueX;
+    float valueY;
+    float value;
+    bool pressed;
+};
+
+static BananoInputEvent g_lastInputEvent{
+    -1,
+    BananoInputKind::FaceButton,
+    -1,
+    0.0f,
+    0.0f,
+    0.0f,
+    false
+};
+
+static void BananoPublishInputEvent(
+    int controller,
+    BananoInputKind kind,
+    int control,
+    float x,
+    float y,
+    float value,
+    bool pressed) {
+    g_lastInputEvent.controller = controller;
+    g_lastInputEvent.kind = kind;
+    g_lastInputEvent.control = control;
+    g_lastInputEvent.valueX = x;
+    g_lastInputEvent.valueY = y;
+    g_lastInputEvent.value = value;
+    g_lastInputEvent.pressed = pressed;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimePublishInput(
+    int controller, int kind, int control,
+    float x, float y, float value, int pressed) {
+    if (controller < 0 || controller > 1)
+        return;
+    if (kind < 0 || kind > static_cast<int>(BananoInputKind::HmdPose))
+        return;
+
+    BananoPublishInputEvent(
+        controller,
+        static_cast<BananoInputKind>(kind),
+        control,
+        x,
+        y,
+        value,
+        pressed != 0);
+}
+
 struct BananoThumbstick {
     float x;
     float y;
