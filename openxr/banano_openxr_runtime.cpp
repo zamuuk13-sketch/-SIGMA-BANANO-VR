@@ -1023,7 +1023,31 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateSwapchain") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrEnumerateSwapchainImages") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateSwapchainImages);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrAcquireSwapchainImage") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoAcquireSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrWaitSwapchainImage") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoWaitSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrReleaseSwapchainImage") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoReleaseSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrCreateSwapchain") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoCreateSwapchain);
         return XR_SUCCESS;
