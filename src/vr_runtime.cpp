@@ -35,3 +35,10 @@ const char* BananoVRRuntimeBackendText(BananoVRBackend backend) {
     }
     return "Desconhecido";
 }
+
+
+bool BananoVRRuntimeHasOpenXRBridge() {
+    // Etapa 11: ponto de entrada reservado para a integracao real.
+    // A camada ainda nao registra um runtime no Windows.
+    return false;
+}
