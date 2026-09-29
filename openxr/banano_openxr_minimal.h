@@ -332,3 +332,36 @@ typedef struct XrSwapchainCreateInfo {
 
 #define XR_ERROR_FEATURE_UNSUPPORTED -8
 #define XR_ERROR_SWAPCHAIN_FORMAT_UNSUPPORTED -45
+
+typedef uint32_t XrSwapchainImageAcquireInfoDummy;
+
+#define XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO 7
+#define XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO 48
+#define XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO 10
+
+typedef struct XrSwapchainImageAcquireInfo {
+    XrStructureType type;
+    const void* next;
+} XrSwapchainImageAcquireInfo;
+
+typedef struct XrSwapchainImageWaitInfo {
+    XrStructureType type;
+    const void* next;
+    XrDuration timeout;
+} XrSwapchainImageWaitInfo;
+
+typedef struct XrSwapchainImageReleaseInfo {
+    XrStructureType type;
+    const void* next;
+} XrSwapchainImageReleaseInfo;
+
+typedef struct XrSwapchainImageBaseHeader {
+    XrStructureType type;
+    void* next;
+} XrSwapchainImageBaseHeader;
+
+typedef struct XrSwapchainImageDummy {
+    XrStructureType type;
+    void* next;
+    uint32_t imageIndex;
+} XrSwapchainImageDummy;
