@@ -246,7 +246,9 @@ static void DetectFrame(LPVIDEOHDR frame) {
     int height = g_cameraHeight;
     if (width <= 0 || height <= 0) return;
 
-    DetectHand(frame);\n\n    // VFW callback data is the raw 24-bit frame buffer.
+    DetectHand(frame);
+
+    // VFW callback data is the raw 24-bit frame buffer.
     BYTE* pixels = frame->lpData;
     const int bytesPerPixel = 3;
     const int stride = width * bytesPerPixel;
