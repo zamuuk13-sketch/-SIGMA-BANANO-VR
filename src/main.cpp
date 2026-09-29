@@ -344,7 +344,7 @@ static void StopCamera() {
     g_camera = nullptr;
     g_cameraRunning = false;
     g_detections.clear();
-    g_trackedDetections.clear();\n    g_trackedDetections.clear();
+    g_trackedDetections.clear();
     InvalidateRect(g_mainWindow, nullptr, FALSE);
     SetStatus("Status: camera parada.");
 }
