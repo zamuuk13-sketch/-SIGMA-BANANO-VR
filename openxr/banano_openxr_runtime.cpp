@@ -17,6 +17,76 @@ static XrTime BananoNowNs() {
         steady_clock::now().time_since_epoch()).count();
 }
 
+struct BananoXrSwapchain {
+    uint32_t magic;
+    XrSession session;
+    uint32_t width;
+    uint32_t height;
+    int64_t format;
+    uint32_t imageCount;
+};
+
+static XrResult BANANO_XR_CALL BananoCreateSwapchain(
+    XrSession session,
+    const XrSwapchainCreateInfo* info,
+    XrSwapchain* swapchain) {
+
+    if (!session || !info || !swapchain)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* sessionObject =
+        reinterpret_cast<BananoXrSession*>(session);
+    if (!sessionObject->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (info->type != XR_TYPE_SWAPCHAIN_CREATE_INFO ||
+        info->width == 0 || info->height == 0 ||
+        info->faceCount != 1 || info->arraySize == 0 ||
+        info->mipCount != 1 || info->sampleCount == 0)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (info->format != XR_SWAPCHAIN_FORMAT_R8G8B8A8)
+        return XR_ERROR_SWAPCHAIN_FORMAT_UNSUPPORTED;
+
+    BananoXrSwapchain* object = new (std::nothrow) BananoXrSwapchain{};
+    if (!object)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->magic = 0x53574150;
+    object->session = session;
+    object->width = info->width;
+    object->height = info->height;
+    object->format = info->format;
+    object->imageCount = 3;
+
+    *swapchain = reinterpret_cast<XrSwapchain>(object);
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoEnumerateSwapchainImages(
+    XrSwapchain swapchain,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    void* images) {
+
+    if (!swapchain || !countOutput)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSwapchain* object =
+        reinterpret_cast<BananoXrSwapchain*>(swapchain);
+
+    *countOutput = object->imageCount;
+    if (capacityInput == 0 || !images)
+        return XR_SUCCESS;
+
+    if (capacityInput < object->imageCount)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    // As imagens GPU reais serão ligadas quando a API gráfica da sessão
+    // for implementada. Nesta etapa o runtime expõe apenas a contagem.
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoEndFrame(
     XrSession session,
     const XrFrameEndInfo* frameEndInfo) {
@@ -790,7 +860,19 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrEndFrame") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateSwapchain") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoCreateSwapchain);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEnumerateSwapchainImages") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateSwapchainImages);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEndFrame") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoEndFrame);
         return XR_SUCCESS;
