@@ -62,6 +62,8 @@ static std::vector<Detection> g_detections;
 static int g_colorTolerance = 30;
 static int g_positionToleranceValue = 20;
 static bool g_cameraRunning = false;
+static int g_cameraWidth = 640;
+static int g_cameraHeight = 480;
 
 static const char* kControls[] = {
     "Esquerdo: A", "Esquerdo: B", "Esquerdo: X", "Esquerdo: Y",
@@ -137,12 +139,11 @@ static bool IsColor(BYTE r, BYTE g, BYTE b, const char* color) {
 static void DetectFrame(LPVIDEOHDR frame) {
     if (!frame || !frame->lpData || !g_cameraRunning) return;
 
-    BITMAPINFOHEADER* info = (BITMAPINFOHEADER*)frame->lpData;
-    int width = info->biWidth;
-    int height = abs(info->biHeight);
+    int width = g_cameraWidth;
+    int height = g_cameraHeight;
     if (width <= 0 || height <= 0) return;
 
-    // The VFW frame buffer is normally followed by RGB pixels.
+    // VFW callback data is the raw 24-bit frame buffer.
     BYTE* pixels = frame->lpData;
     const int bytesPerPixel = 3;
     const int stride = width * bytesPerPixel;
@@ -156,7 +157,7 @@ static void DetectFrame(LPVIDEOHDR frame) {
         int minX = width, minY = height, maxX = 0, maxY = 0;
 
         for (int y = 0; y < height; y += 6) {
-            const int sourceY = (info->biHeight > 0) ? (height - 1 - y) : y;
+            const int sourceY = height - 1 - y;
             BYTE* row = pixels + sourceY * stride;
 
             for (int x = 0; x < width; x += 6) {
@@ -459,25 +460,10 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         HDC dc = BeginPaint(hwnd, &ps);
 
         if (g_cameraRunning) {
-            for (const Detection& d : g_detections) {
-                HPEN pen = CreatePen(PS_SOLID, 3, RGB(255, 255, 255));
-                HBRUSH brush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
-                HPEN oldPen = (HPEN)SelectObject(dc, pen);
-                HBRUSH oldBrush = (HBRUSH)SelectObject(dc, brush);
-
-                int x = 430 + d.x;
-                int y = 70 + d.y;
-                Ellipse(dc, x - d.size, y - d.size, x + d.size, y + d.size);
-
-                SelectObject(dc, oldPen);
-                SelectObject(dc, oldBrush);
-                DeleteObject(pen);
-
-                char label[64]{};
-                wsprintfA(label, "%s", d.color.c_str());
-                SetBkMode(dc, TRANSPARENT);
-                TextOutA(dc, x + d.size + 4, y - 8, label, (int)strlen(label));
-            }
+            char info[128]{};
+            wsprintfA(info, "Detectados: %d marcador(es)", (int)g_detections.size());
+            SetBkMode(dc, TRANSPARENT);
+            TextOutA(dc, 430, 535, info, (int)strlen(info));
         }
 
         EndPaint(hwnd, &ps);
