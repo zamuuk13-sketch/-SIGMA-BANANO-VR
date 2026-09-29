@@ -161,3 +161,14 @@ typedef struct BananoVRInputSnapshot {
 } BananoVRInputSnapshot;
 
 #define BANANO_INPUT_SNAPSHOT_VERSION 1
+
+typedef uint64_t XrSystemId;
+typedef struct XrSystemGetInfo {
+    XrStructureType type;
+    const void* next;
+    uint32_t formFactor;
+} XrSystemGetInfo;
+
+#define XR_TYPE_SYSTEM_GET_INFO 4
+#define XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY 1
+#define BANANO_XR_SYSTEM_ID 1
