@@ -159,6 +159,81 @@ extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeGetMarkerControl(int 
     return static_cast<int>(BananoFindMarkerControl(markerId));
 }
 
+static float BananoClampUnit(float value) {
+    return value < 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
+}
+
+static float BananoClampSigned(float value) {
+    return value < -1.0f ? -1.0f : (value > 1.0f ? 1.0f : value);
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetMarkerHandPosition(
+    int markerId, float handX, float handY, int touching) {
+    const BananoMarkerControl control = BananoFindMarkerControl(markerId);
+    const bool pressed = touching != 0;
+    const float x = BananoClampSigned(handX);
+    const float y = BananoClampSigned(handY);
+
+    switch (control) {
+    case BananoMarkerControl::LeftThumbstick:
+        BananoVRRuntimeSetThumbstick(0, x, y);
+        BananoPublishInputEvent(0, BananoInputKind::Thumbstick,
+            static_cast<int>(control), x, y, 0.0f, pressed);
+        break;
+    case BananoMarkerControl::RightThumbstick:
+        BananoVRRuntimeSetThumbstick(1, x, y);
+        BananoPublishInputEvent(1, BananoInputKind::Thumbstick,
+            static_cast<int>(control), x, y, 0.0f, pressed);
+        break;
+    case BananoMarkerControl::LeftTrigger:
+        BananoVRRuntimeSetTrigger(0, BananoClampUnit(handY));
+        BananoPublishInputEvent(0, BananoInputKind::Trigger,
+            static_cast<int>(control), x, y, BananoClampUnit(handY), pressed);
+        break;
+    case BananoMarkerControl::RightTrigger:
+        BananoVRRuntimeSetTrigger(1, BananoClampUnit(handY));
+        BananoPublishInputEvent(1, BananoInputKind::Trigger,
+            static_cast<int>(control), x, y, BananoClampUnit(handY), pressed);
+        break;
+    case BananoMarkerControl::LeftGrip:
+        BananoVRRuntimeSetGrip(0, BananoClampUnit(handY));
+        BananoPublishInputEvent(0, BananoInputKind::Grip,
+            static_cast<int>(control), x, y, BananoClampUnit(handY), pressed);
+        break;
+    case BananoMarkerControl::RightGrip:
+        BananoVRRuntimeSetGrip(1, BananoClampUnit(handY));
+        BananoPublishInputEvent(1, BananoInputKind::Grip,
+            static_cast<int>(control), x, y, BananoClampUnit(handY), pressed);
+        break;
+    case BananoMarkerControl::LeftThumbstickClick:
+        BananoVRRuntimeSetThumbstickClick(0, pressed ? 1 : 0);
+        BananoPublishInputEvent(0, BananoInputKind::ThumbstickClick,
+            static_cast<int>(control), x, y, 0.0f, pressed);
+        break;
+    case BananoMarkerControl::RightThumbstickClick:
+        BananoVRRuntimeSetThumbstickClick(1, pressed ? 1 : 0);
+        BananoPublishInputEvent(1, BananoInputKind::ThumbstickClick,
+            static_cast<int>(control), x, y, 0.0f, pressed);
+        break;
+    case BananoMarkerControl::LeftA:
+    case BananoMarkerControl::LeftB:
+    case BananoMarkerControl::LeftX:
+    case BananoMarkerControl::LeftY:
+    case BananoMarkerControl::RightA:
+    case BananoMarkerControl::RightB:
+    case BananoMarkerControl::RightX:
+    case BananoMarkerControl::RightY: {
+        const int controller = static_cast<int>(control) >=
+            static_cast<int>(BananoMarkerControl::RightA) ? 1 : 0;
+        BananoPublishInputEvent(controller, BananoInputKind::FaceButton,
+            static_cast<int>(control), x, y, 0.0f, pressed);
+        break;
+    }
+    case BananoMarkerControl::None:
+        break;
+    }
+}
+
 static void BananoPublishInputEvent(
     int controller,
     BananoInputKind kind,
