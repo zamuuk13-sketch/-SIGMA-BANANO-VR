@@ -199,3 +199,15 @@ typedef struct XrSystemProperties {
     XrSystemGraphicsProperties graphicsProperties;
     XrSystemTrackingProperties trackingProperties;
 } XrSystemProperties;
+
+#define XR_ERROR_SIZE_INSUFFICIENT -13
+#define XR_ERROR_SYSTEM_INVALID -17
+#define XR_ERROR_VIEW_CONFIGURATION_TYPE_UNSUPPORTED -29
+#define XR_TYPE_VIEW_CONFIGURATION_PROPERTIES 48
+
+typedef struct XrViewConfigurationProperties {
+    XrStructureType type;
+    void* next;
+    XrViewConfigurationType viewConfigurationType;
+    XrBool32 fovMutable;
+} XrViewConfigurationProperties;
