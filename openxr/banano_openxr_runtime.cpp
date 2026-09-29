@@ -1,6 +1,6 @@
 #include "banano_openxr_minimal.h"
 #include <cstring>
-#include <new>
+#include <new>\n#include <chrono>
 #include <cmath>
 
 struct BananoXrSession {
@@ -10,6 +10,50 @@ struct BananoXrSession {
     XrViewConfigurationType viewConfigurationType;
     bool running;
 };
+
+static XrTime BananoNowNs() {
+    using namespace std::chrono;
+    return duration_cast<nanoseconds>(
+        steady_clock::now().time_since_epoch()).count();
+}
+
+static XrResult BANANO_XR_CALL BananoWaitFrame(
+    XrSession session,
+    const XrFrameWaitInfo*,
+    XrFrameState* frameState) {
+
+    if (!session || !frameState)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* object = reinterpret_cast<BananoXrSession*>(session);
+    if (!object->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (frameState->type != XR_TYPE_FRAME_STATE)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    frameState->predictedDisplayPeriod = 16666666;
+    frameState->predictedDisplayTime = BananoNowNs() + 16666666;
+    frameState->shouldRender = 1;
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoBeginFrame(
+    XrSession session,
+    const XrFrameBeginInfo* frameBeginInfo) {
+
+    if (!session || !frameBeginInfo)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* object = reinterpret_cast<BananoXrSession*>(session);
+    if (!object->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (frameBeginInfo->type != XR_TYPE_FRAME_BEGIN_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    return XR_SUCCESS;
+}
 
 static XrResult BANANO_XR_CALL BananoBeginSession(
     XrSession session,
@@ -721,7 +765,19 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrBeginSession") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrWaitFrame") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoWaitFrame);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrBeginFrame") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoBeginFrame);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrBeginSession") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoBeginSession);
         return XR_SUCCESS;
