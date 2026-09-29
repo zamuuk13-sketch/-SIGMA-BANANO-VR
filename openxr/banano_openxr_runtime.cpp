@@ -1,6 +1,7 @@
 #include "banano_openxr_minimal.h"
 #include <cstring>
 #include <new>
+#include <cmath>
 
 struct BananoXrInstance {
     uint32_t magic;
@@ -29,6 +30,46 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetHmdPosition(
     g_hmdPose.positionX = x;
     g_hmdPose.positionY = y;
     g_hmdPose.positionZ = z;
+}
+
+static void BananoNormalizeQuaternion(BananoHmdPose& pose) {
+    const float lengthSquared =
+        pose.orientationX * pose.orientationX +
+        pose.orientationY * pose.orientationY +
+        pose.orientationZ * pose.orientationZ +
+        pose.orientationW * pose.orientationW;
+
+    if (lengthSquared <= 0.000001f) {
+        pose.orientationX = 0.0f;
+        pose.orientationY = 0.0f;
+        pose.orientationZ = 0.0f;
+        pose.orientationW = 1.0f;
+        return;
+    }
+
+    const float inverseLength = 1.0f / std::sqrt(lengthSquared);
+    pose.orientationX *= inverseLength;
+    pose.orientationY *= inverseLength;
+    pose.orientationZ *= inverseLength;
+    pose.orientationW *= inverseLength;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerOrientation(
+    float qx, float qy, float qz, float qw) {
+    g_leftController.pose.orientationX = qx;
+    g_leftController.pose.orientationY = qy;
+    g_leftController.pose.orientationZ = qz;
+    g_leftController.pose.orientationW = qw;
+    BananoNormalizeQuaternion(g_leftController.pose);
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetRightControllerOrientation(
+    float qx, float qy, float qz, float qw) {
+    g_rightController.pose.orientationX = qx;
+    g_rightController.pose.orientationY = qy;
+    g_rightController.pose.orientationZ = qz;
+    g_rightController.pose.orientationW = qw;
+    BananoNormalizeQuaternion(g_rightController.pose);
 }
 
 struct BananoControllerState {
