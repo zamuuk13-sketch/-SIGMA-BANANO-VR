@@ -3,6 +3,42 @@
 #include <new>
 #include <cmath>
 
+struct BananoXrSession {
+    uint32_t magic;
+    XrInstance instance;
+    XrSystemId systemId;
+    XrViewConfigurationType viewConfigurationType;
+    bool running;
+};
+
+static XrResult BANANO_XR_CALL BananoCreateSession(
+    XrInstance instance,
+    const XrSessionCreateInfo* info,
+    XrSession* session) {
+
+    if (!instance || !info || !session)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (info->type != XR_TYPE_SESSION_CREATE_INFO ||
+        info->createFlags != 0 ||
+        info->systemId != BANANO_XR_SYSTEM_ID)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* object = new (std::nothrow) BananoXrSession{};
+    if (!object)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->magic = 0x53455353;
+    object->instance = instance;
+    object->systemId = info->systemId;
+    object->viewConfigurationType =
+        XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
+    object->running = false;
+
+    *session = reinterpret_cast<XrSession>(object);
+    return XR_SUCCESS;
+}
+
 struct BananoXrInstance {
     uint32_t magic;
     XrVersion apiVersion;
@@ -664,7 +700,13 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateInstance") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateSession") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoCreateSession);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrCreateInstance") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoCreateInstance);
         return XR_SUCCESS;
