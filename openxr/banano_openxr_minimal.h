@@ -307,3 +307,28 @@ typedef struct XrSwapchainCreateInfo {
     uint32_t arraySize;
     uint32_t mipCount;
 } XrSwapchainCreateInfo;
+
+typedef struct XrSwapchain_T* XrSwapchain;
+typedef XrFlags64 XrSwapchainCreateFlags;
+typedef XrFlags64 XrSwapchainUsageFlags;
+
+#define XR_TYPE_SWAPCHAIN_CREATE_INFO 9
+#define XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT 0x00000001
+#define XR_SWAPCHAIN_USAGE_SAMPLED_BIT 0x00000020
+
+typedef struct XrSwapchainCreateInfo {
+    XrStructureType type;
+    const void* next;
+    XrSwapchainCreateFlags createFlags;
+    XrSwapchainUsageFlags usageFlags;
+    int64_t format;
+    uint32_t sampleCount;
+    uint32_t width;
+    uint32_t height;
+    uint32_t faceCount;
+    uint32_t arraySize;
+    uint32_t mipCount;
+} XrSwapchainCreateInfo;
+
+#define XR_ERROR_FEATURE_UNSUPPORTED -8
+#define XR_ERROR_SWAPCHAIN_FORMAT_UNSUPPORTED -45
