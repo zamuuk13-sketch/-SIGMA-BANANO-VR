@@ -477,6 +477,22 @@ static const uint32_t kBananoStereoViewCount = 2;
 static const uint32_t kBananoRecommendedEyeWidth = 1024;
 static const uint32_t kBananoRecommendedEyeHeight = 1024;
 
+static XrResult BANANO_XR_CALL BananoGetSystem(
+    XrInstance instance,
+    const XrSystemGetInfo* getInfo,
+    XrSystemId* systemId) {
+
+    if (!instance || !getInfo || !systemId)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (getInfo->type != XR_TYPE_SYSTEM_GET_INFO ||
+        getInfo->formFactor != XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY)
+        return XR_ERROR_FORM_FACTOR_UNSUPPORTED;
+
+    *systemId = BANANO_XR_SYSTEM_ID;
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateInstance(
     const XrInstanceCreateInfo* info,
     XrInstance* instance) {
