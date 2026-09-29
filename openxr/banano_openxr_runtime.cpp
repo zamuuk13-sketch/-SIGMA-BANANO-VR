@@ -59,6 +59,56 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerCon
     g_leftController.connected = connected != 0;
 }
 
+struct BananoInputProfile {
+    char name[64];
+    bool enabled;
+};
+
+static constexpr int BANANO_MAX_INPUT_PROFILES = 8;
+static BananoInputProfile g_inputProfiles[BANANO_MAX_INPUT_PROFILES]{};
+static int g_inputProfileCount = 0;
+static int g_activeInputProfile = -1;
+
+extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeCreateInputProfile(
+    const char* name) {
+    if (!name || !name[0] || g_inputProfileCount >= BANANO_MAX_INPUT_PROFILES)
+        return -1;
+
+    for (int i = 0; i < g_inputProfileCount; ++i) {
+        if (strcmp(g_inputProfiles[i].name, name) == 0)
+            return i;
+    }
+
+    std::strncpy(g_inputProfiles[g_inputProfileCount].name,
+        name, sizeof(g_inputProfiles[g_inputProfileCount].name) - 1);
+    g_inputProfiles[g_inputProfileCount].name[
+        sizeof(g_inputProfiles[g_inputProfileCount].name) - 1] = '\\0';
+    g_inputProfiles[g_inputProfileCount].enabled = true;
+    return g_inputProfileCount++;
+}
+
+extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeSetActiveInputProfile(
+    int profileId) {
+    if (profileId < 0 || profileId >= g_inputProfileCount ||
+        !g_inputProfiles[profileId].enabled)
+        return 0;
+    g_activeInputProfile = profileId;
+    return 1;
+}
+
+extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeGetActiveInputProfile() {
+    return g_activeInputProfile;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetInputProfileEnabled(
+    int profileId, int enabled) {
+    if (profileId < 0 || profileId >= g_inputProfileCount)
+        return;
+    g_inputProfiles[profileId].enabled = enabled != 0;
+    if (!g_inputProfiles[profileId].enabled && g_activeInputProfile == profileId)
+        g_activeInputProfile = -1;
+}
+
 enum class BananoInputKind {
     FaceButton,
     Trigger,
