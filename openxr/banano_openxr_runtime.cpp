@@ -1,15 +1,35 @@
 #include "banano_openxr_minimal.h"
 #include <cstring>
+#include <new>
+
+struct BananoXrInstance {
+    uint32_t magic;
+    XrVersion apiVersion;
+};
 
 static XrResult BANANO_XR_CALL BananoCreateInstance(
-    const XrInstanceCreateInfo*,
+    const XrInstanceCreateInfo* info,
     XrInstance* instance) {
 
-    if (instance) *instance = XR_NULL_HANDLE;
+    if (!instance || !info)
+        return XR_ERROR_RUNTIME_FAILURE;
 
-    // Etapa 14: o caminho de criacao ja esta exposto ao Loader,
-    // mas a instancia real ainda depende das proximas etapas do runtime.
-    return XR_ERROR_INITIALIZATION_FAILED;
+    *instance = XR_NULL_HANDLE;
+
+    if (info->type != XR_TYPE_INSTANCE_CREATE_INFO ||
+        info->createFlags != 0 ||
+        info->applicationInfo.applicationName[0] == '\\0')
+        return XR_ERROR_INITIALIZATION_FAILED;
+
+    BananoXrInstance* object = new (std::nothrow) BananoXrInstance{};
+    if (!object)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->magic = 0x42414E4F;
+    object->apiVersion = info->applicationInfo.apiVersion;
+
+    *instance = reinterpret_cast<XrInstance>(object);
+    return XR_SUCCESS;
 }
 
 static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
