@@ -36,6 +36,18 @@ struct Marker {
     std::string mapping;
 };
 
+struct HandTracking {
+    bool detected;
+    int minX;
+    int minY;
+    int maxX;
+    int maxY;
+    int palmX;
+    int palmY;
+    int fingertipX;
+    int fingertipY;
+};
+
 struct Detection {
     std::string color;
     int x;
@@ -69,6 +81,7 @@ static bool g_cameraRunning = false;
 static int g_cameraWidth = 640;
 static int g_cameraHeight = 480;
 static std::vector<Detection> g_trackedDetections;
+static HandTracking g_handTracking{false, 0, 0, 0, 0, 0, 0, 0, 0};
 
 static const char* kControls[] = {
     "Esquerdo: A", "Esquerdo: B", "Esquerdo: X", "Esquerdo: Y",
@@ -141,6 +154,91 @@ static bool IsColor(BYTE r, BYTE g, BYTE b, const char* color) {
     return false;
 }
 
+static bool IsSkin(BYTE r, BYTE g, BYTE b) {
+    // Faixa simples de pele, usada somente como primeira camada de hand tracking.
+    return r > 80 && g > 35 && b > 20 &&
+           r > g + 15 && r > b + 25 &&
+           (r - g) < 140;
+}
+
+static void DetectHand(LPVIDEOHDR frame) {
+    if (!frame || !frame->lpData || !g_cameraRunning) return;
+
+    BYTE* pixels = frame->lpData;
+    const int width = g_cameraWidth;
+    const int height = g_cameraHeight;
+    const int stride = width * 3;
+
+    long sumX = 0, sumY = 0, count = 0;
+    int minX = width, minY = height, maxX = 0, maxY = 0;
+
+    for (int y = 0; y < height; y += 4) {
+        const int sourceY = height - 1 - y;
+        BYTE* row = pixels + sourceY * stride;
+
+        for (int x = 0; x < width; x += 4) {
+            BYTE b = row[x * 3 + 0];
+            BYTE g = row[x * 3 + 1];
+            BYTE r = row[x * 3 + 2];
+
+            if (!IsSkin(r, g, b)) continue;
+
+            sumX += x;
+            sumY += y;
+            ++count;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+    }
+
+    if (count < 120) {
+        g_handTracking.detected = false;
+        return;
+    }
+
+    int centerX = (int)(sumX / count);
+    int centerY = (int)(sumY / count);
+
+    long bestDistance = -1;
+    int tipX = centerX;
+    int tipY = centerY;
+
+    for (int y = minY; y <= maxY; y += 6) {
+        const int sourceY = height - 1 - y;
+        BYTE* row = pixels + sourceY * stride;
+
+        for (int x = minX; x <= maxX; x += 6) {
+            BYTE b = row[x * 3 + 0];
+            BYTE g = row[x * 3 + 1];
+            BYTE r = row[x * 3 + 2];
+
+            if (!IsSkin(r, g, b)) continue;
+
+            long dx = (long)x - centerX;
+            long dy = (long)y - centerY;
+            long distance = dx * dx + dy * dy;
+
+            if (distance > bestDistance) {
+                bestDistance = distance;
+                tipX = x;
+                tipY = y;
+            }
+        }
+    }
+
+    g_handTracking.detected = true;
+    g_handTracking.minX = minX;
+    g_handTracking.minY = minY;
+    g_handTracking.maxX = maxX;
+    g_handTracking.maxY = maxY;
+    g_handTracking.palmX = centerX;
+    g_handTracking.palmY = centerY;
+    g_handTracking.fingertipX = tipX;
+    g_handTracking.fingertipY = tipY;
+}
+
 static void DetectFrame(LPVIDEOHDR frame) {
     if (!frame || !frame->lpData || !g_cameraRunning) return;
 
@@ -148,7 +246,7 @@ static void DetectFrame(LPVIDEOHDR frame) {
     int height = g_cameraHeight;
     if (width <= 0 || height <= 0) return;
 
-    // VFW callback data is the raw 24-bit frame buffer.
+    DetectHand(frame);\n\n    // VFW callback data is the raw 24-bit frame buffer.
     BYTE* pixels = frame->lpData;
     const int bytesPerPixel = 3;
     const int stride = width * bytesPerPixel;
@@ -227,6 +325,37 @@ static void DetectFrame(LPVIDEOHDR frame) {
 }
 
 static void DrawTrackingOverlay(HDC dc) {
+    if (g_handTracking.detected) {
+        HPEN handPen = CreatePen(PS_SOLID, 2, RGB(80, 150, 255));
+        HGDIOBJ oldPen = SelectObject(dc, handPen);
+        HGDIOBJ oldBrush = SelectObject(dc, GetStockObject(NULL_BRUSH));
+
+        Rectangle(dc,
+            g_handTracking.minX,
+            g_handTracking.minY,
+            g_handTracking.maxX,
+            g_handTracking.maxY);
+
+        SelectObject(dc, oldPen);
+        DeleteObject(handPen);
+
+        const int radius = 8;
+        HPEN tipPen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+        HBRUSH tipBrush = CreateSolidBrush(RGB(255, 255, 255));
+        oldPen = SelectObject(dc, tipPen);
+        HGDIOBJ oldBrush2 = SelectObject(dc, tipBrush);
+        Ellipse(dc,
+            g_handTracking.fingertipX - radius,
+            g_handTracking.fingertipY - radius,
+            g_handTracking.fingertipX + radius,
+            g_handTracking.fingertipY + radius);
+        SelectObject(dc, oldBrush2);
+        SelectObject(dc, oldPen);
+        DeleteObject(tipPen);
+        DeleteObject(tipBrush);
+    }
+
+
     SetBkMode(dc, TRANSPARENT);
 
     for (const Detection& d : g_trackedDetections) {
@@ -345,6 +474,7 @@ static void StopCamera() {
     g_cameraRunning = false;
     g_detections.clear();
     g_trackedDetections.clear();
+    g_handTracking.detected = false;
     InvalidateRect(g_mainWindow, nullptr, FALSE);
     SetStatus("Status: camera parada.");
 }
@@ -355,7 +485,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         g_mainWindow = hwnd;
         HFONT font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-        CreateWindowA("STATIC", "Banano VR PC - Etapa 8",
+        CreateWindowA("STATIC", "Banano VR PC - Etapa 9",
             WS_CHILD | WS_VISIBLE, 20, 15, 380, 25, hwnd, nullptr, nullptr, nullptr);
 
         CreateWindowA("STATIC", "IP do celular:",
@@ -374,7 +504,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             305, 72, 65, 24, hwnd, (HMENU)IDC_SAVE, nullptr, nullptr);
 
-        CreateWindowA("STATIC", "Camera / tracking",
+        CreateWindowA("STATIC", "Camera / hand tracking",
             WS_CHILD | WS_VISIBLE, 430, 15, 300, 25, hwnd, nullptr, nullptr, nullptr);
         CreateWindowA("BUTTON", "Iniciar camera",
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
