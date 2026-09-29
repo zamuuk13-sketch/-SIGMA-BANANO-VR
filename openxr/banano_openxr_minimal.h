@@ -392,3 +392,32 @@ typedef struct XrSwapchainImageReleaseInfo {
 #define XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO 102
 #define XR_TYPE_SWAPCHAIN_IMAGE_BASE_HEADER 0
 #define XR_ERROR_CALL_ORDER_INVALID -37
+
+#define XR_TYPE_REFERENCE_SPACE_CREATE_INFO 37
+#define XR_REFERENCE_SPACE_TYPE_VIEW 1
+#define XR_REFERENCE_SPACE_TYPE_LOCAL 2
+
+typedef struct XrSpace_T* XrSpace;
+typedef XrFlags64 XrSpaceLocationFlags;
+
+#define XR_SPACE_LOCATION_ORIENTATION_VALID_BIT 0x00000001
+#define XR_SPACE_LOCATION_POSITION_VALID_BIT 0x00000002
+
+typedef struct XrPosef {
+    struct { float x, y, z, w; } orientation;
+    struct { float x, y, z; } position;
+} XrPosef;
+
+typedef struct XrReferenceSpaceCreateInfo {
+    XrStructureType type;
+    const void* next;
+    int32_t referenceSpaceType;
+    XrPosef poseInReferenceSpace;
+} XrReferenceSpaceCreateInfo;
+
+typedef struct XrSpaceLocation {
+    XrStructureType type;
+    void* next;
+    XrSpaceLocationFlags locationFlags;
+    XrPosef pose;
+} XrSpaceLocation;
