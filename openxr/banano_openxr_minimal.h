@@ -86,3 +86,13 @@ typedef struct XrInstanceCreateInfo {
     uint32_t enabledExtensionCount;
     const char* const* enabledExtensionNames;
 } XrInstanceCreateInfo;
+
+typedef struct BananoHmdPose {
+    float positionX;
+    float positionY;
+    float positionZ;
+    float orientationX;
+    float orientationY;
+    float orientationZ;
+    float orientationW;
+} BananoHmdPose;
