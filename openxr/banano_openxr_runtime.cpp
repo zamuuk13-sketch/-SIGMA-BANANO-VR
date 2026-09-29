@@ -58,6 +58,31 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerCon
     g_leftController.connected = connected != 0;
 }
 
+struct BananoThumbstick {
+    float x;
+    float y;
+    bool click;
+};
+
+static BananoThumbstick g_leftThumbstick{ 0.0f, 0.0f, false };
+static BananoThumbstick g_rightThumbstick{ 0.0f, 0.0f, false };
+
+static BananoThumbstick& BananoGetThumbstick(int controller) {
+    return controller == 0 ? g_leftThumbstick : g_rightThumbstick;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetThumbstick(
+    int controller, float x, float y) {
+    BananoThumbstick& stick = BananoGetThumbstick(controller);
+    stick.x = x < -1.0f ? -1.0f : (x > 1.0f ? 1.0f : x);
+    stick.y = y < -1.0f ? -1.0f : (y > 1.0f ? 1.0f : y);
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetThumbstickClick(
+    int controller, int pressed) {
+    BananoGetThumbstick(controller).click = pressed != 0;
+}
+
 struct BananoControllerAnalog {
     float trigger;
     float grip;
