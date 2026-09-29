@@ -13,6 +13,23 @@ static BananoHmdPose g_hmdPose{
     0.0f, 0.0f, 0.0f, 1.0f
 };
 
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetHmdOrientation(
+    float x, float y, float z, float w) {
+
+    g_hmdPose.orientationX = x;
+    g_hmdPose.orientationY = y;
+    g_hmdPose.orientationZ = z;
+    g_hmdPose.orientationW = w;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetHmdPosition(
+    float x, float y, float z) {
+
+    g_hmdPose.positionX = x;
+    g_hmdPose.positionY = y;
+    g_hmdPose.positionZ = z;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateInstance(
     const XrInstanceCreateInfo* info,
     XrInstance* instance) {
