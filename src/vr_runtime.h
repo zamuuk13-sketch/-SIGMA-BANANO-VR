@@ -23,3 +23,4 @@ void BananoVRRuntimeInitialize();
 const BananoVRRuntimeInfo& BananoVRRuntimeGetInfo();
 const char* BananoVRRuntimeStateText(BananoVRRuntimeState state);
 const char* BananoVRRuntimeBackendText(BananoVRBackend backend);
+bool BananoVRRuntimeHasOpenXRBridge();
