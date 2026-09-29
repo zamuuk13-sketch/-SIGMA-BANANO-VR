@@ -33,6 +33,72 @@ struct BananoXrSpace {
     BananoHmdPose pose;
 };
 
+static XrResult BANANO_XR_CALL BananoLocateViews(
+    XrSession session,
+    const XrViewLocateInfo* viewLocateInfo,
+    XrViewState* viewState,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    XrView* views) {
+
+    if (!session || !viewLocateInfo || !viewState || !countOutput)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* sessionObject =
+        reinterpret_cast<BananoXrSession*>(session);
+
+    if (!sessionObject->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (viewLocateInfo->type != XR_TYPE_VIEW_LOCATE_INFO ||
+        viewLocateInfo->viewConfigurationType !=
+            XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO)
+        return XR_ERROR_VIEW_CONFIGURATION_TYPE_UNSUPPORTED;
+
+    if (viewState->type != XR_TYPE_VIEW_STATE)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    *countOutput = kBananoStereoViewCount;
+
+    if (capacityInput == 0 || !views) {
+        viewState->viewStateFlags =
+            XR_VIEW_STATE_ORIENTATION_VALID_BIT |
+            XR_VIEW_STATE_POSITION_VALID_BIT;
+        return XR_SUCCESS;
+    }
+
+    if (capacityInput < kBananoStereoViewCount)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    const float eyeOffset = 0.032f;
+
+    for (uint32_t i = 0; i < kBananoStereoViewCount; ++i) {
+        if (views[i].type != XR_TYPE_VIEW)
+            return XR_ERROR_RUNTIME_FAILURE;
+
+        views[i].pose.orientation.x = g_hmdPose.orientationX;
+        views[i].pose.orientation.y = g_hmdPose.orientationY;
+        views[i].pose.orientation.z = g_hmdPose.orientationZ;
+        views[i].pose.orientation.w = g_hmdPose.orientationW;
+
+        views[i].pose.position.x =
+            g_hmdPose.positionX + (i == 0 ? -eyeOffset : eyeOffset);
+        views[i].pose.position.y = g_hmdPose.positionY;
+        views[i].pose.position.z = g_hmdPose.positionZ;
+
+        views[i].fov.angleLeft = -0.785398f;
+        views[i].fov.angleRight = 0.785398f;
+        views[i].fov.angleUp = 0.785398f;
+        views[i].fov.angleDown = -0.785398f;
+    }
+
+    viewState->viewStateFlags =
+        XR_VIEW_STATE_ORIENTATION_VALID_BIT |
+        XR_VIEW_STATE_POSITION_VALID_BIT;
+
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateReferenceSpace(
     XrSession session,
     const XrReferenceSpaceCreateInfo* createInfo,
@@ -1114,6 +1180,12 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrReleaseSwapchainImage") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoReleaseSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrLocateViews") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoLocateViews);
         return XR_SUCCESS;
     }
 
