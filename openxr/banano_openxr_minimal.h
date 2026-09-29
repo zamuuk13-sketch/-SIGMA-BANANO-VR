@@ -111,3 +111,14 @@ typedef struct XrViewConfigurationView {
 
 #define XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO 2
 #define XR_TYPE_VIEW_CONFIGURATION_VIEW 41
+
+typedef struct BananoControllerPose {
+    float positionX;
+    float positionY;
+    float positionZ;
+    float orientationX;
+    float orientationY;
+    float orientationZ;
+    float orientationW;
+    int connected;
+} BananoControllerPose;
