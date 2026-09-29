@@ -130,3 +130,6 @@ typedef struct BananoControllerPose {
 #define BANANO_FACE_BUTTON_B 1
 #define BANANO_FACE_BUTTON_X 2
 #define BANANO_FACE_BUTTON_Y 3
+
+#define BANANO_ANALOG_MIN 0.0f
+#define BANANO_ANALOG_MAX 1.0f
