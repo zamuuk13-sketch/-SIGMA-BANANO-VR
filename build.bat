@@ -13,11 +13,12 @@ if errorlevel 1 (
 
 echo [BANANO VR] Compilando...
 
-g++ -std=c++17 -O2 -mwindows src\main.cpp -o build\BananoVR.exe
+g++ -std=c++17 -O2 -mwindows src\main.cpp -lvfw32 -o build\BananoVR.exe
 
 if errorlevel 1 (
     echo.
     echo [ERRO] Falha na compilacao.
+    echo Verifique se o MinGW-w64 possui as bibliotecas do Windows/VFW.
     pause
     exit /b 1
 )
