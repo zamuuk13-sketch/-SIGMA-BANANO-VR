@@ -26,6 +26,7 @@
 #define IDC_APPLY_CALIBRATION 117
 #define IDC_CAMERA 118
 #define IDC_CAMERA_START 119
+#define IDC_OVERLAY 120
 
 struct Marker {
     int id;
@@ -57,6 +58,7 @@ static HWND g_mappingList = nullptr;
 static HWND g_tolerance = nullptr;
 static HWND g_positionTolerance = nullptr;
 static HWND g_camera = nullptr;
+static HWND g_overlay = nullptr;
 static HWND g_mainWindow = nullptr;
 
 static std::vector<Marker> g_markers;
@@ -221,6 +223,57 @@ static void DetectFrame(LPVIDEOHDR frame) {
     g_detections = next;
     g_trackedDetections = next;
     if (g_mainWindow) InvalidateRect(g_mainWindow, nullptr, FALSE);
+    if (g_overlay) InvalidateRect(g_overlay, nullptr, FALSE);
+}
+
+static void DrawTrackingOverlay(HDC dc) {
+    SetBkMode(dc, TRANSPARENT);
+
+    for (const Detection& d : g_trackedDetections) {
+        const int radius = 11;
+        const int left = d.x - radius;
+        const int top = d.y - radius;
+        const int right = d.x + radius;
+        const int bottom = d.y + radius;
+
+        HPEN pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+        HBRUSH brush = (HBRUSH)GetStockObject(NULL_BRUSH);
+        HGDIOBJ oldPen = SelectObject(dc, pen);
+        HGDIOBJ oldBrush = SelectObject(dc, brush);
+
+        Ellipse(dc, left, top, right, bottom);
+
+        SelectObject(dc, oldBrush);
+        SelectObject(dc, oldPen);
+        DeleteObject(pen);
+
+        char label[32]{};
+        if (d.id > 0)
+            wsprintfA(label, "%d", d.id);
+        else
+            wsprintfA(label, "?");
+
+        RECT textRect{left, top, right, bottom};
+        DrawTextA(dc, label, -1, &textRect,
+            DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    }
+}
+
+static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+    case WM_ERASEBKGND:
+        return 1;
+
+    case WM_PAINT: {
+        PAINTSTRUCT ps{};
+        HDC dc = BeginPaint(hwnd, &ps);
+        DrawTrackingOverlay(dc);
+        EndPaint(hwnd, &ps);
+        return 0;
+    }
+    }
+
+    return DefWindowProcA(hwnd, msg, wParam, lParam);
 }
 
 static LRESULT CALLBACK FrameCallback(HWND, LPVIDEOHDR frame) {
@@ -251,12 +304,40 @@ static void StartCamera() {
     capPreviewRate(g_camera, 33);
     capPreview(g_camera, TRUE);
 
+    g_overlay = CreateWindowExA(
+        WS_EX_TRANSPARENT,
+        "BananoVROverlay",
+        "",
+        WS_CHILD | WS_VISIBLE,
+        0, 0, g_cameraWidth, g_cameraHeight,
+        g_camera, (HMENU)IDC_OVERLAY, GetModuleHandleA(nullptr), nullptr
+    );
+
+    if (!g_overlay) {
+        capPreview(g_camera, FALSE);
+        capSetCallbackOnFrame(g_camera, nullptr);
+        capDriverDisconnect(g_camera);
+        DestroyWindow(g_camera);
+        g_camera = nullptr;
+        SetStatus("Status: nao foi possivel criar o overlay de tracking.");
+        return;
+    }
+
+    SetWindowPos(g_overlay, HWND_TOP, 0, 0, g_cameraWidth, g_cameraHeight,
+        SWP_SHOWWINDOW);
+    SetStatus("Status: camera ativa e procurando marcadores.");
     g_cameraRunning = true;
     SetStatus("Status: camera ativa e procurando marcadores.");
 }
 
 static void StopCamera() {
     if (!g_camera) return;
+
+    if (g_overlay) {
+        DestroyWindow(g_overlay);
+        g_overlay = nullptr;
+    }
+
     capPreview(g_camera, FALSE);
     capSetCallbackOnFrame(g_camera, nullptr);
     capDriverDisconnect(g_camera);
@@ -275,7 +356,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         g_mainWindow = hwnd;
         HFONT font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-        CreateWindowA("STATIC", "Banano VR PC - Etapa 7",
+        CreateWindowA("STATIC", "Banano VR PC - Etapa 8",
             WS_CHILD | WS_VISIBLE, 20, 15, 380, 25, hwnd, nullptr, nullptr, nullptr);
 
         CreateWindowA("STATIC", "IP do celular:",
@@ -294,7 +375,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             305, 72, 65, 24, hwnd, (HMENU)IDC_SAVE, nullptr, nullptr);
 
-        CreateWindowA("STATIC", "Camera / deteccao",
+        CreateWindowA("STATIC", "Camera / tracking",
             WS_CHILD | WS_VISIBLE, 430, 15, 300, 25, hwnd, nullptr, nullptr, nullptr);
         CreateWindowA("BUTTON", "Iniciar camera",
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -529,6 +610,18 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     const char* className = "BananoVRWindow";
     WNDCLASSA wc{};
+    WNDCLASSA overlayClass{};
+    overlayClass.lpfnWndProc = OverlayProc;
+    overlayClass.hInstance = hInstance;
+    overlayClass.lpszClassName = "BananoVROverlay";
+    overlayClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    overlayClass.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
+
+    if (!RegisterClassA(&overlayClass)) {
+        MessageBoxA(nullptr, "Nao foi possivel iniciar o overlay de tracking.", "Banano VR", MB_OK | MB_ICONERROR);
+        return 1;
+    }
+
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = className;
