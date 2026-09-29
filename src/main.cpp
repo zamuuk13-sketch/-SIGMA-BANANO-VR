@@ -1,3 +1,4 @@
+#include "vr_runtime.h"
 #include <windows.h>
 #include <vfw.h>
 #include <vector>
@@ -485,9 +486,10 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
     switch (msg) {
     case WM_CREATE: {
         g_mainWindow = hwnd;
+        BananoVRRuntimeInitialize();
         HFONT font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-        CreateWindowA("STATIC", "Banano VR PC - Etapa 9",
+        CreateWindowA("STATIC", "Banano VR PC - Etapa 10",
             WS_CHILD | WS_VISIBLE, 20, 15, 380, 25, hwnd, nullptr, nullptr, nullptr);
 
         CreateWindowA("STATIC", "IP do celular:",
@@ -506,7 +508,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             305, 72, 65, 24, hwnd, (HMENU)IDC_SAVE, nullptr, nullptr);
 
-        CreateWindowA("STATIC", "Camera / hand tracking",
+        CreateWindowA("STATIC", "VR Runtime / Camera",
             WS_CHILD | WS_VISIBLE, 430, 15, 300, 25, hwnd, nullptr, nullptr, nullptr);
         CreateWindowA("BUTTON", "Iniciar camera",
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
