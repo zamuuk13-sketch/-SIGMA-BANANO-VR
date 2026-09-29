@@ -26,6 +26,76 @@ struct BananoXrSwapchain {
     uint32_t imageCount;
 };
 
+struct BananoXrSpace {
+    uint32_t magic;
+    XrSession session;
+    int32_t referenceSpaceType;
+    BananoHmdPose pose;
+};
+
+static XrResult BANANO_XR_CALL BananoCreateReferenceSpace(
+    XrSession session,
+    const XrReferenceSpaceCreateInfo* createInfo,
+    XrSpace* space) {
+
+    if (!session || !createInfo || !space)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* sessionObject =
+        reinterpret_cast<BananoXrSession*>(session);
+    if (!sessionObject->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (createInfo->type != XR_TYPE_REFERENCE_SPACE_CREATE_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (createInfo->referenceSpaceType != XR_REFERENCE_SPACE_TYPE_VIEW &&
+        createInfo->referenceSpaceType != XR_REFERENCE_SPACE_TYPE_LOCAL)
+        return XR_ERROR_FEATURE_UNSUPPORTED;
+
+    BananoXrSpace* object = new (std::nothrow) BananoXrSpace{};
+    if (!object)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->magic = 0x53504143;
+    object->session = session;
+    object->referenceSpaceType = createInfo->referenceSpaceType;
+    object->pose = g_hmdPose;
+
+    *space = reinterpret_cast<XrSpace>(object);
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoLocateSpace(
+    XrSpace space,
+    XrSpace,
+    XrTime,
+    XrSpaceLocation* location) {
+
+    if (!space || !location)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSpace* object = reinterpret_cast<BananoXrSpace*>(space);
+
+    if (location->type != XR_TYPE_SPACE_LOCATION)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->pose = g_hmdPose;
+    location->locationFlags =
+        XR_SPACE_LOCATION_ORIENTATION_VALID_BIT |
+        XR_SPACE_LOCATION_POSITION_VALID_BIT;
+
+    location->pose.orientation.x = object->pose.orientationX;
+    location->pose.orientation.y = object->pose.orientationY;
+    location->pose.orientation.z = object->pose.orientationZ;
+    location->pose.orientation.w = object->pose.orientationW;
+    location->pose.position.x = object->pose.positionX;
+    location->pose.position.y = object->pose.positionY;
+    location->pose.position.z = object->pose.positionZ;
+
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateSwapchain(
     XrSession session,
     const XrSwapchainCreateInfo* info,
@@ -1044,6 +1114,18 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrReleaseSwapchainImage") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoReleaseSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrCreateReferenceSpace") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoCreateReferenceSpace);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrLocateSpace") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoLocateSpace);
         return XR_SUCCESS;
     }
 
