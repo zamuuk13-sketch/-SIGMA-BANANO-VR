@@ -129,6 +129,12 @@ struct BananoInputEvent {
     bool pressed;
 };
 
+static uint64_t g_inputSequence = 0;
+
+extern "C" BANANO_EXPORT uint64_t BANANO_XR_CALL BananoVRRuntimeGetInputSequence() {
+    return g_inputSequence;
+}
+
 static BananoInputEvent g_lastInputEvent{
     -1,
     BananoInputKind::FaceButton,
@@ -305,6 +311,7 @@ static void BananoPublishInputEvent(
     g_lastInputEvent.valueY = y;
     g_lastInputEvent.value = value;
     g_lastInputEvent.pressed = pressed;
+    ++g_inputSequence;
 }
 
 extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimePublishInput(
