@@ -240,3 +240,28 @@ typedef struct XrSessionBeginInfo {
     const void* next;
     XrViewConfigurationType primaryViewConfigurationType;
 } XrSessionBeginInfo;
+
+typedef int64_t XrTime;
+typedef int64_t XrDuration;
+
+#define XR_TYPE_FRAME_WAIT_INFO 33
+#define XR_TYPE_FRAME_STATE 35
+#define XR_TYPE_FRAME_BEGIN_INFO 15
+
+typedef struct XrFrameWaitInfo {
+    XrStructureType type;
+    const void* next;
+} XrFrameWaitInfo;
+
+typedef struct XrFrameState {
+    XrStructureType type;
+    void* next;
+    XrBool32 predictedDisplayPeriod;
+    XrBool32 shouldRender;
+    XrTime predictedDisplayTime;
+} XrFrameState;
+
+typedef struct XrFrameBeginInfo {
+    XrStructureType type;
+    const void* next;
+} XrFrameBeginInfo;
