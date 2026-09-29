@@ -94,6 +94,11 @@ struct BananoXrSwapchain {
     uint32_t width;
     uint32_t height;
     uint32_t arraySize;
+    uint32_t imageCount;
+    uint32_t acquiredImage;
+    bool imageAcquired;
+    bool imageReady;
+    bool imageReleased;
 };
 
 static XrResult BANANO_XR_CALL BananoCreateSwapchain(
@@ -139,8 +144,109 @@ static XrResult BANANO_XR_CALL BananoCreateSwapchain(
     object->width = createInfo->width;
     object->height = createInfo->height;
     object->arraySize = createInfo->arraySize;
+    object->imageCount = 2;
+    object->acquiredImage = 0;
+    object->imageAcquired = false;
+    object->imageReady = false;
+    object->imageReleased = true;
 
     *swapchain = reinterpret_cast<XrSwapchain>(object);
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoEnumerateSwapchainImages(
+    XrSwapchain swapchain,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    XrSwapchainImageBaseHeader* images) {
+
+    if (!swapchain || !countOutput)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSwapchain* object =
+        reinterpret_cast<BananoXrSwapchain*>(swapchain);
+
+    *countOutput = object->imageCount;
+    if (capacityInput == 0 || !images)
+        return XR_SUCCESS;
+
+    if (capacityInput < object->imageCount)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    for (uint32_t i = 0; i < object->imageCount; ++i) {
+        if (images[i].type == 0)
+            images[i].type = XR_TYPE_SWAPCHAIN_IMAGE_DUMMY;
+        images[i].next = nullptr;
+    }
+
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoAcquireSwapchainImage(
+    XrSwapchain swapchain,
+    const XrSwapchainImageAcquireInfo* acquireInfo,
+    uint32_t* index) {
+
+    if (!swapchain || !acquireInfo || !index)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSwapchain* object =
+        reinterpret_cast<BananoXrSwapchain*>(swapchain);
+
+    if (acquireInfo->type != XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (object->imageAcquired)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->acquiredImage =
+        (object->acquiredImage + 1) % object->imageCount;
+    object->imageAcquired = true;
+    object->imageReady = false;
+    object->imageReleased = false;
+    *index = object->acquiredImage;
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoWaitSwapchainImage(
+    XrSwapchain swapchain,
+    const XrSwapchainImageWaitInfo* waitInfo) {
+
+    if (!swapchain || !waitInfo)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSwapchain* object =
+        reinterpret_cast<BananoXrSwapchain*>(swapchain);
+
+    if (waitInfo->type != XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (!object->imageAcquired)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->imageReady = true;
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoReleaseSwapchainImage(
+    XrSwapchain swapchain,
+    const XrSwapchainImageReleaseInfo* releaseInfo) {
+
+    if (!swapchain || !releaseInfo)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSwapchain* object =
+        reinterpret_cast<BananoXrSwapchain*>(swapchain);
+
+    if (releaseInfo->type != XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (!object->imageAcquired || !object->imageReady)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->imageAcquired = false;
+    object->imageReady = false;
+    object->imageReleased = true;
     return XR_SUCCESS;
 }
 
@@ -932,6 +1038,30 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrCreateSwapchain") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoCreateSwapchain);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEnumerateSwapchainImages") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateSwapchainImages);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrAcquireSwapchainImage") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoAcquireSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrWaitSwapchainImage") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoWaitSwapchainImage);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrReleaseSwapchainImage") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoReleaseSwapchainImage);
         return XR_SUCCESS;
     }
 
