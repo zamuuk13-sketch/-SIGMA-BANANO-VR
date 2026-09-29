@@ -6,6 +6,7 @@ struct BananoXrInstance {
     uint32_t magic;
     XrVersion apiVersion;
     BananoHmdPose pose;
+    uint32_t viewCount;
 };
 
 static BananoHmdPose g_hmdPose{
@@ -51,6 +52,7 @@ static XrResult BANANO_XR_CALL BananoCreateInstance(
     object->magic = 0x42414E4F;
     object->apiVersion = info->applicationInfo.apiVersion;
     object->pose = g_hmdPose;
+    object->viewCount = 2;
 
     *instance = reinterpret_cast<XrInstance>(object);
     return XR_SUCCESS;
