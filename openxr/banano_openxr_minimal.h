@@ -122,3 +122,6 @@ typedef struct BananoControllerPose {
     float orientationW;
     int connected;
 } BananoControllerPose;
+
+#define BANANO_CONTROLLER_LEFT 0
+#define BANANO_CONTROLLER_RIGHT 1
