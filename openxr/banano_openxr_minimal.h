@@ -457,3 +457,20 @@ typedef struct XrView {
     XrPosef pose;
     XrFovf fov;
 } XrView;
+
+#define XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED 6
+#define XR_TYPE_EVENT_DATA_BUFFER 16
+
+typedef struct XrEventDataBuffer {
+    XrStructureType type;
+    const void* next;
+    uint8_t varying[4000];
+} XrEventDataBuffer;
+
+typedef struct XrEventDataSessionStateChanged {
+    XrStructureType type;
+    const void* next;
+    XrSession session;
+    XrSessionState state;
+    XrTime time;
+} XrEventDataSessionStateChanged;
