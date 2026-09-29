@@ -1,8 +1,8 @@
 # Banano VR PC
 
-## Etapa 1
+## Etapa 2
 
-Base inicial do aplicativo Banano VR para PC.
+Base inicial do aplicativo Banano VR para PC com configuracao basica de conexao.
 
 ### Requisitos
 - Windows
@@ -17,4 +17,11 @@ O executavel sera criado em:
 
 `build/BananoVR.exe`
 
-Nesta etapa o aplicativo apenas confirma que a base C++ esta funcionando. Tracking, conexao mobile e VR serao adicionados nas proximas etapas.
+### Nesta etapa
+- Janela simples do aplicativo.
+- Campo para endereco IP do celular.
+- Campo para porta.
+- Botao para salvar a configuracao.
+- Status basico da configuracao.
+
+A conexao real USB/Wi-Fi e o recebimento de dados serao adicionados nas proximas etapas.
