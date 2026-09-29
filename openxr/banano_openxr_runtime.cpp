@@ -1,11 +1,39 @@
 #include "banano_openxr_minimal.h"
+#include <cstring>
+
+static XrResult BANANO_XR_CALL BananoCreateInstance(
+    const XrInstanceCreateInfo*,
+    XrInstance* instance) {
+
+    if (instance) *instance = XR_NULL_HANDLE;
+
+    // Etapa 14: o caminho de criacao ja esta exposto ao Loader,
+    // mas a instancia real ainda depende das proximas etapas do runtime.
+    return XR_ERROR_INITIALIZATION_FAILED;
+}
 
 static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     XrInstance,
-    const char*,
+    const char* name,
     PFN_xrVoidFunction* function) {
 
-    if (function) *function = nullptr;
+    if (!function || !name)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    *function = nullptr;
+
+    if (strcmp(name, "xrGetInstanceProcAddr") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoGetInstanceProcAddr);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrCreateInstance") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoCreateInstance);
+        return XR_SUCCESS;
+    }
+
     return XR_ERROR_FUNCTION_UNSUPPORTED;
 }
 
