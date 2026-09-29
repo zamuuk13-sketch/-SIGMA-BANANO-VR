@@ -1,0 +1,7 @@
+{
+  "file_format_version": "1.0.0",
+  "runtime": {
+    "name": "Banano VR Runtime",
+    "library_path": "..\\build\\BananoVRRuntime.dll"
+  }
+}
