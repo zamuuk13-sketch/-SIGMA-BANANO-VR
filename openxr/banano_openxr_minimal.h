@@ -423,3 +423,37 @@ typedef struct XrSpaceLocation {
     XrSpaceLocationFlags locationFlags;
     XrPosef pose;
 } XrSpaceLocation;
+
+#define XR_TYPE_VIEW_LOCATE_INFO 6
+#define XR_TYPE_VIEW_STATE 10
+#define XR_TYPE_VIEW 12
+#define XR_VIEW_STATE_ORIENTATION_VALID_BIT 0x00000001
+#define XR_VIEW_STATE_POSITION_VALID_BIT 0x00000002
+
+typedef struct XrViewLocateInfo {
+    XrStructureType type;
+    const void* next;
+    XrViewConfigurationType viewConfigurationType;
+    XrTime displayTime;
+    XrSpace space;
+} XrViewLocateInfo;
+
+typedef struct XrViewState {
+    XrStructureType type;
+    void* next;
+    XrFlags64 viewStateFlags;
+} XrViewState;
+
+typedef struct XrFovf {
+    float angleLeft;
+    float angleRight;
+    float angleUp;
+    float angleDown;
+} XrFovf;
+
+typedef struct XrView {
+    XrStructureType type;
+    void* next;
+    XrPosef pose;
+    XrFovf fov;
+} XrView;
