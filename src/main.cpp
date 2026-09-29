@@ -490,7 +490,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         BananoVRRuntimeInitialize();
         HFONT font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-        CreateWindowA("STATIC", "Banano VR PC - Etapa 10",
+        CreateWindowA("STATIC", "Banano VR PC - Etapa 14",
             WS_CHILD | WS_VISIBLE, 20, 15, 380, 25, hwnd, nullptr, nullptr, nullptr);
 
         CreateWindowA("STATIC", "IP do celular:",
@@ -509,7 +509,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             305, 72, 65, 24, hwnd, (HMENU)IDC_SAVE, nullptr, nullptr);
 
-        CreateWindowA("STATIC", "VR Runtime / Camera",
+        CreateWindowA("STATIC", "VR Runtime / OpenXR",
             WS_CHILD | WS_VISIBLE, 430, 15, 300, 25, hwnd, nullptr, nullptr, nullptr);
         CreateWindowA("BUTTON", "Iniciar camera",
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
