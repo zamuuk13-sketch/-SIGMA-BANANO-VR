@@ -58,6 +58,34 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerCon
     g_leftController.connected = connected != 0;
 }
 
+enum class BananoFaceButton { A, B, X, Y };
+
+struct BananoControllerButtons {
+    bool a;
+    bool b;
+    bool x;
+    bool y;
+};
+
+static BananoControllerButtons g_leftButtons{ false, false, false, false };
+static BananoControllerButtons g_rightButtons{ false, false, false, false };
+
+static BananoControllerButtons& BananoGetButtons(int controller) {
+    return controller == 0 ? g_leftButtons : g_rightButtons;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetFaceButton(
+    int controller, int button, int pressed) {
+    BananoControllerButtons& buttons = BananoGetButtons(controller);
+    const bool value = pressed != 0;
+    switch (static_cast<BananoFaceButton>(button)) {
+    case BananoFaceButton::A: buttons.a = value; break;
+    case BananoFaceButton::B: buttons.b = value; break;
+    case BananoFaceButton::X: buttons.x = value; break;
+    case BananoFaceButton::Y: buttons.y = value; break;
+    }
+}
+
 static BananoControllerState g_rightController{
     false,
     { 0.20f, -0.10f, -0.45f, 0.0f, 0.0f, 0.0f, 1.0f }
