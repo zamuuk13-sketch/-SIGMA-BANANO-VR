@@ -58,6 +58,30 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerCon
     g_leftController.connected = connected != 0;
 }
 
+struct BananoControllerAnalog {
+    float trigger;
+    float grip;
+};
+
+static BananoControllerAnalog g_leftAnalog{ 0.0f, 0.0f };
+static BananoControllerAnalog g_rightAnalog{ 0.0f, 0.0f };
+
+static BananoControllerAnalog& BananoGetAnalog(int controller) {
+    return controller == 0 ? g_leftAnalog : g_rightAnalog;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetTrigger(
+    int controller, float value) {
+    BananoControllerAnalog& analog = BananoGetAnalog(controller);
+    analog.trigger = value < 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetGrip(
+    int controller, float value) {
+    BananoControllerAnalog& analog = BananoGetAnalog(controller);
+    analog.grip = value < 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
+}
+
 enum class BananoFaceButton { A, B, X, Y };
 
 struct BananoControllerButtons {
