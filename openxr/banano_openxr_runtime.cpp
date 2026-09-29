@@ -477,6 +477,39 @@ static const uint32_t kBananoStereoViewCount = 2;
 static const uint32_t kBananoRecommendedEyeWidth = 1024;
 static const uint32_t kBananoRecommendedEyeHeight = 1024;
 
+static XrResult BANANO_XR_CALL BananoGetSystemProperties(
+    XrInstance instance,
+    XrSystemId systemId,
+    XrSystemProperties* properties) {
+
+    if (!instance || !properties)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (systemId != BANANO_XR_SYSTEM_ID ||
+        properties->type != XR_TYPE_SYSTEM_PROPERTIES)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    properties->systemId = BANANO_XR_SYSTEM_ID;
+    properties->vendorId = 0xBABA;
+    std::strncpy(
+        properties->systemName,
+        "Banano VR",
+        XR_MAX_SYSTEM_NAME_SIZE - 1);
+    properties->systemName[XR_MAX_SYSTEM_NAME_SIZE - 1] = '\0';
+
+    properties->graphicsProperties.maxSwapchainImageWidth =
+        kBananoRecommendedEyeWidth;
+    properties->graphicsProperties.maxSwapchainImageHeight =
+        kBananoRecommendedEyeHeight;
+    properties->graphicsProperties.maxLayerCount =
+        XR_MIN_COMPOSITION_LAYERS_SUPPORTED;
+
+    properties->trackingProperties.orientationTracking = 1;
+    properties->trackingProperties.positionTracking = 1;
+
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoGetSystem(
     XrInstance instance,
     const XrSystemGetInfo* getInfo,
@@ -536,7 +569,7 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateInstance") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateInstance") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoCreateInstance);
         return XR_SUCCESS;
