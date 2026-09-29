@@ -211,3 +211,15 @@ typedef struct XrViewConfigurationProperties {
     XrViewConfigurationType viewConfigurationType;
     XrBool32 fovMutable;
 } XrViewConfigurationProperties;
+
+typedef struct XrSession_T* XrSession;
+typedef uint64_t XrSessionCreateFlags;
+
+#define XR_TYPE_SESSION_CREATE_INFO 8
+
+typedef struct XrSessionCreateInfo {
+    XrStructureType type;
+    const void* next;
+    XrSessionCreateFlags createFlags;
+    XrSystemId systemId;
+} XrSessionCreateInfo;
