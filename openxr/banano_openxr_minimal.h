@@ -256,7 +256,7 @@ typedef struct XrFrameWaitInfo {
 typedef struct XrFrameState {
     XrStructureType type;
     void* next;
-    XrBool32 predictedDisplayPeriod;
+    XrDuration predictedDisplayPeriod;
     XrBool32 shouldRender;
     XrTime predictedDisplayTime;
 } XrFrameState;
