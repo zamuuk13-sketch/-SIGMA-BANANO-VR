@@ -3,7 +3,8 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
-#include <cmath>\n#include <algorithm>
+#include <cmath>
+#include <algorithm>
 #pragma comment(lib, "vfw32.lib")
 
 #define IDC_IP 101
@@ -39,6 +40,7 @@ struct Detection {
     int x;
     int y;
     int size;
+    int id;
 };
 
 static HWND g_ip = nullptr;
@@ -63,7 +65,8 @@ static int g_colorTolerance = 30;
 static int g_positionToleranceValue = 20;
 static bool g_cameraRunning = false;
 static int g_cameraWidth = 640;
-static int g_cameraHeight = 480;\nstatic std::vector<Detection> g_trackedDetections;
+static int g_cameraHeight = 480;
+static std::vector<Detection> g_trackedDetections;\nstatic std::vector<Detection> g_trackedDetections;
 
 static const char* kControls[] = {
     "Esquerdo: A", "Esquerdo: B", "Esquerdo: X", "Esquerdo: Y",
@@ -186,7 +189,37 @@ static void DetectFrame(LPVIDEOHDR frame) {
         }
     }
 
+    for (Detection& d : next) {
+        d.id = 0;
+        int bestIndex = -1;
+        long bestDistance = 0x7fffffff;
+        for (int i = 0; i < (int)g_markers.size(); ++i) {
+            const Marker& marker = g_markers[i];
+            if (marker.color != d.color) continue;
+            long dx = (long)d.x - marker.x;
+            long dy = (long)d.y - marker.y;
+            long distance = dx * dx + dy * dy;
+            long tolerance = 30L + (long)g_positionToleranceValue * 6L;
+            if (distance <= tolerance * tolerance && distance < bestDistance) {
+                bestDistance = distance;
+                bestIndex = i;
+            }
+        }
+        if (bestIndex >= 0) d.id = g_markers[bestIndex].id;
+    }
+
+    for (Detection& current : next) {
+        for (const Detection& previous : g_trackedDetections) {
+            if (current.id > 0 && current.id == previous.id) {
+                current.x = (current.x * 3 + previous.x) / 4;
+                current.y = (current.y * 3 + previous.y) / 4;
+                break;
+            }
+        }
+    }
+
     g_detections = next;
+    g_trackedDetections = next;
     if (g_mainWindow) InvalidateRect(g_mainWindow, nullptr, FALSE);
 }
 
@@ -230,7 +263,8 @@ static void StopCamera() {
     DestroyWindow(g_camera);
     g_camera = nullptr;
     g_cameraRunning = false;
-    g_detections.clear();\n    g_trackedDetections.clear();
+    g_detections.clear();
+    g_trackedDetections.clear();\n    g_trackedDetections.clear();
     InvalidateRect(g_mainWindow, nullptr, FALSE);
     SetStatus("Status: camera parada.");
 }
@@ -460,10 +494,23 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         HDC dc = BeginPaint(hwnd, &ps);
 
         if (g_cameraRunning) {
+            int recognized = 0;
+            for (const Detection& d : g_detections) if (d.id > 0) ++recognized;
             char info[128]{};
-            wsprintfA(info, "Detectados: %d marcador(es)", (int)g_detections.size());
+            wsprintfA(info, "Detectados: %d | IDs reconhecidos: %d", (int)g_detections.size(), recognized);
             SetBkMode(dc, TRANSPARENT);
             TextOutA(dc, 430, 535, info, (int)strlen(info));
+
+            int lineY = 555;
+            for (const Detection& d : g_detections) {
+                char line[128]{};
+                if (d.id > 0)
+                    wsprintfA(line, "ID %d | %s | X:%d Y:%d", d.id, d.color.c_str(), d.x, d.y);
+                else
+                    wsprintfA(line, "Sem ID | %s | X:%d Y:%d", d.color.c_str(), d.x, d.y);
+                TextOutA(dc, 430, lineY, line, (int)strlen(line));
+                lineY += 18;
+            }
         }
 
         EndPaint(hwnd, &ps);
