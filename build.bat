@@ -13,7 +13,7 @@ if errorlevel 1 (
 
 echo [BANANO VR] Compilando...
 
-g++ -std=c++17 -O2 -mwindows src\main.cpp -lvfw32 -o build\BananoVR.exe
+g++ -std=c++17 -O2 -mwindows src\main.cpp src\vr_runtime.cpp -lvfw32 -o build\BananoVR.exe
 
 if errorlevel 1 (
     echo.
