@@ -11,6 +11,27 @@ struct BananoXrSession {
     bool running;
 };
 
+static XrResult BANANO_XR_CALL BananoBeginSession(
+    XrSession session,
+    const XrSessionBeginInfo* beginInfo) {
+
+    if (!session || !beginInfo)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* object = reinterpret_cast<BananoXrSession*>(session);
+
+    if (beginInfo->type != XR_TYPE_SESSION_BEGIN_INFO ||
+        beginInfo->primaryViewConfigurationType !=
+            XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO)
+        return XR_ERROR_VIEW_CONFIGURATION_TYPE_UNSUPPORTED;
+
+    if (object->running)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->running = true;
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateSession(
     XrInstance instance,
     const XrSessionCreateInfo* info,
@@ -700,7 +721,13 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrCreateSession") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrBeginSession") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoBeginSession);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrCreateSession") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoCreateSession);
         return XR_SUCCESS;
