@@ -31,6 +31,10 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetHmdPosition(
     g_hmdPose.positionZ = z;
 }
 
+static const uint32_t kBananoStereoViewCount = 2;
+static const uint32_t kBananoRecommendedEyeWidth = 1024;
+static const uint32_t kBananoRecommendedEyeHeight = 1024;
+
 static XrResult BANANO_XR_CALL BananoCreateInstance(
     const XrInstanceCreateInfo* info,
     XrInstance* instance) {
@@ -52,7 +56,7 @@ static XrResult BANANO_XR_CALL BananoCreateInstance(
     object->magic = 0x42414E4F;
     object->apiVersion = info->applicationInfo.apiVersion;
     object->pose = g_hmdPose;
-    object->viewCount = 2;
+    object->viewCount = kBananoStereoViewCount;
 
     *instance = reinterpret_cast<XrInstance>(object);
     return XR_SUCCESS;
