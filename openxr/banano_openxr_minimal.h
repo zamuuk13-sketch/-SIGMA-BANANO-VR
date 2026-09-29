@@ -365,3 +365,30 @@ typedef struct XrSwapchainImageDummy {
     void* next;
     uint32_t imageIndex;
 } XrSwapchainImageDummy;
+
+typedef struct XrSwapchainImageBaseHeader {
+    XrStructureType type;
+    void* next;
+} XrSwapchainImageBaseHeader;
+
+typedef struct XrSwapchainImageAcquireInfo {
+    XrStructureType type;
+    const void* next;
+} XrSwapchainImageAcquireInfo;
+
+typedef struct XrSwapchainImageWaitInfo {
+    XrStructureType type;
+    const void* next;
+    XrDuration timeout;
+} XrSwapchainImageWaitInfo;
+
+typedef struct XrSwapchainImageReleaseInfo {
+    XrStructureType type;
+    const void* next;
+} XrSwapchainImageReleaseInfo;
+
+#define XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO 100
+#define XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO 101
+#define XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO 102
+#define XR_TYPE_SWAPCHAIN_IMAGE_BASE_HEADER 0
+#define XR_ERROR_CALL_ORDER_INVALID -37
