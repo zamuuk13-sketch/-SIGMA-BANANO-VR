@@ -57,3 +57,32 @@ typedef XrResult (BANANO_XR_CALL *PFN_xrCreateInstance)(
     const XrInstanceCreateInfo* info, XrInstance* instance);
 
 #define XR_NULL_HANDLE nullptr
+
+typedef int64_t XrFlags64;
+typedef int32_t XrStructureType;
+typedef XrFlags64 XrInstanceCreateFlags;
+
+#define XR_TYPE_INSTANCE_CREATE_INFO 3
+#define XR_MAX_APPLICATION_NAME_SIZE 128
+#define XR_MAX_ENGINE_NAME_SIZE 128
+#define XR_MAX_API_LAYER_NAME_SIZE 256
+#define XR_MAX_EXTENSION_NAME_SIZE 128
+
+typedef struct XrApplicationInfo {
+    char applicationName[XR_MAX_APPLICATION_NAME_SIZE];
+    uint32_t applicationVersion;
+    char engineName[XR_MAX_ENGINE_NAME_SIZE];
+    uint32_t engineVersion;
+    XrVersion apiVersion;
+} XrApplicationInfo;
+
+typedef struct XrInstanceCreateInfo {
+    XrStructureType type;
+    const void* next;
+    XrInstanceCreateFlags createFlags;
+    XrApplicationInfo applicationInfo;
+    uint32_t enabledApiLayerCount;
+    const char* const* enabledApiLayerNames;
+    uint32_t enabledExtensionCount;
+    const char* const* enabledExtensionNames;
+} XrInstanceCreateInfo;
