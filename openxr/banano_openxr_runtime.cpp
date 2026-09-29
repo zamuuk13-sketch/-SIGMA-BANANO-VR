@@ -449,6 +449,38 @@ static XrResult BANANO_XR_CALL BananoBeginFrame(
     return XR_SUCCESS;
 }
 
+static XrSessionState g_bananoSessionState = XR_SESSION_STATE_IDLE;
+static XrTime g_bananoSessionStateTime = 0;
+
+static void BananoSetSessionState(XrSessionState state, XrSession session) {
+    g_bananoSessionState = state;
+    g_bananoSessionStateTime = BananoNowNs();
+
+    if (session) {
+        BananoXrSession* object =
+            reinterpret_cast<BananoXrSession*>(session);
+        object->running = (state == XR_SESSION_STATE_FOCUSED ||
+                           state == XR_SESSION_STATE_VISIBLE ||
+                           state == XR_SESSION_STATE_SYNCHRONIZED);
+    }
+}
+
+static XrResult BANANO_XR_CALL BananoPollEvent(
+    XrInstance instance,
+    XrEventDataBuffer* eventData) {
+
+    if (!instance || !eventData)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (eventData->type != XR_TYPE_EVENT_DATA_BUFFER)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    // Etapa 42: ciclo inicial de estado sem fila de eventos externa.
+    // A primeira consulta deixa a sessao no estado IDLE.
+    eventData->type = XR_TYPE_EVENT_DATA_BUFFER;
+    return XR_EVENT_UNAVAILABLE;
+}
+
 static XrResult BANANO_XR_CALL BananoBeginSession(
     XrSession session,
     const XrSessionBeginInfo* beginInfo) {
@@ -1258,6 +1290,12 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrBeginFrame") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoBeginFrame);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrPollEvent") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoPollEvent);
         return XR_SUCCESS;
     }
 
