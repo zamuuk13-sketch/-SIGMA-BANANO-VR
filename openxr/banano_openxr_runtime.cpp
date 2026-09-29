@@ -477,6 +477,83 @@ static const uint32_t kBananoStereoViewCount = 2;
 static const uint32_t kBananoRecommendedEyeWidth = 1024;
 static const uint32_t kBananoRecommendedEyeHeight = 1024;
 
+static XrResult BANANO_XR_CALL BananoEnumerateViewConfigurations(
+    XrInstance instance,
+    XrSystemId systemId,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    XrViewConfigurationType* types) {
+
+    if (!instance || !countOutput || systemId != BANANO_XR_SYSTEM_ID)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    *countOutput = 1;
+    if (capacityInput == 0 || !types)
+        return XR_SUCCESS;
+
+    if (capacityInput < 1)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    types[0] = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoGetViewConfigurationProperties(
+    XrInstance instance,
+    XrSystemId systemId,
+    XrViewConfigurationType type,
+    XrViewConfigurationProperties* properties) {
+
+    if (!instance || !properties || systemId != BANANO_XR_SYSTEM_ID)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (type != XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO)
+        return XR_ERROR_VIEW_CONFIGURATION_TYPE_UNSUPPORTED;
+
+    if (properties->type != XR_TYPE_VIEW_CONFIGURATION_PROPERTIES)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    properties->viewConfigurationType = type;
+    properties->fovMutable = 0;
+    return XR_SUCCESS;
+}
+
+static XrResult BANANO_XR_CALL BananoEnumerateViewConfigurationViews(
+    XrInstance instance,
+    XrSystemId systemId,
+    XrViewConfigurationType type,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    XrViewConfigurationView* views) {
+
+    if (!instance || !countOutput || systemId != BANANO_XR_SYSTEM_ID)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (type != XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO)
+        return XR_ERROR_VIEW_CONFIGURATION_TYPE_UNSUPPORTED;
+
+    *countOutput = kBananoStereoViewCount;
+    if (capacityInput == 0 || !views)
+        return XR_SUCCESS;
+
+    if (capacityInput < kBananoStereoViewCount)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    for (uint32_t i = 0; i < kBananoStereoViewCount; ++i) {
+        if (views[i].type != XR_TYPE_VIEW_CONFIGURATION_VIEW)
+            return XR_ERROR_RUNTIME_FAILURE;
+
+        views[i].recommendedImageRectWidth = kBananoRecommendedEyeWidth;
+        views[i].maxImageRectWidth = kBananoRecommendedEyeWidth;
+        views[i].recommendedImageRectHeight = kBananoRecommendedEyeHeight;
+        views[i].maxImageRectHeight = kBananoRecommendedEyeHeight;
+        views[i].recommendedSwapchainSampleCount = 1;
+        views[i].maxSwapchainSampleCount = 1;
+    }
+
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoGetSystemProperties(
     XrInstance instance,
     XrSystemId systemId,
@@ -566,6 +643,24 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrGetInstanceProcAddr") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoGetInstanceProcAddr);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEnumerateViewConfigurations") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateViewConfigurations);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrGetViewConfigurationProperties") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoGetViewConfigurationProperties);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEnumerateViewConfigurationViews") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateViewConfigurationViews);
         return XR_SUCCESS;
     }
 
