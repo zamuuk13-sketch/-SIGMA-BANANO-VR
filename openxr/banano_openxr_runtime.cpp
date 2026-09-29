@@ -159,6 +159,12 @@ extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeGetMarkerControl(int 
     return static_cast<int>(BananoFindMarkerControl(markerId));
 }
 
+static BananoMarkerControl BananoFindMarkerControl(int markerId);
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetThumbstick(int controller, float x, float y);
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetThumbstickClick(int controller, int pressed);
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetTrigger(int controller, float value);
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetGrip(int controller, float value);
+
 static float BananoClampUnit(float value) {
     return value < 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
 }
