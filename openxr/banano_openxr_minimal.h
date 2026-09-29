@@ -267,3 +267,19 @@ typedef struct XrFrameBeginInfo {
     XrStructureType type;
     const void* next;
 } XrFrameBeginInfo;
+
+typedef uint32_t XrEnvironmentBlendMode;
+typedef XrFlags64 XrCompositionLayerFlags;
+
+#define XR_TYPE_FRAME_END_INFO 16
+#define XR_ENVIRONMENT_BLEND_MODE_OPAQUE 1
+#define XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT 2
+
+typedef struct XrFrameEndInfo {
+    XrStructureType type;
+    const void* next;
+    XrTime displayTime;
+    XrEnvironmentBlendMode environmentBlendMode;
+    uint32_t layerCount;
+    const void* const* layers;
+} XrFrameEndInfo;
