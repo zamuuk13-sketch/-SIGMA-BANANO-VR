@@ -68,7 +68,7 @@ static int g_positionToleranceValue = 20;
 static bool g_cameraRunning = false;
 static int g_cameraWidth = 640;
 static int g_cameraHeight = 480;
-static std::vector<Detection> g_trackedDetections;\nstatic std::vector<Detection> g_trackedDetections;
+static std::vector<Detection> g_trackedDetections;
 
 static const char* kControls[] = {
     "Esquerdo: A", "Esquerdo: B", "Esquerdo: X", "Esquerdo: Y",
@@ -325,7 +325,6 @@ static void StartCamera() {
 
     SetWindowPos(g_overlay, HWND_TOP, 0, 0, g_cameraWidth, g_cameraHeight,
         SWP_SHOWWINDOW);
-    SetStatus("Status: camera ativa e procurando marcadores.");
     g_cameraRunning = true;
     SetStatus("Status: camera ativa e procurando marcadores.");
 }
