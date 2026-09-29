@@ -1,31 +1,17 @@
 # Banano VR PC
 
-## Etapa 8
+## Etapa 9
 
-Overlay visual simples para representar o tracking dos marcadores.
-
-### Requisitos
-- Windows
-- MinGW-w64 com `g++` no PATH
-- Webcam/camera disponivel no Windows
-
-### Compilar
-Execute:
-
-`build.bat`
-
-O executavel sera criado em:
-
-`build/BananoVR.exe`
+Primeira camada de hand tracking baseada na imagem da webcam.
 
 ### Nesta etapa
-- Cada deteccao continua sendo identificada pelo sistema de ID da etapa 7.
-- Um pequeno circulo branco aparece sobre cada marcador detectado.
-- O circulo acompanha a posicao suavizada do marcador.
-- Quando o ID e reconhecido, o numero do marcador aparece dentro do circulo.
-- Quando o ID nao e reconhecido, aparece `?`.
-- O overlay fica sobre a imagem da camera sem desenhar esqueleto, pontos ou linhas de mao.
-- A calibracao, a deteccao por cor e o mapeamento de controles continuam funcionando.
+- Detecta uma regiao aproximada da mao pela imagem da camera.
+- Calcula o centro aproximado da mao.
+- Estima uma ponta de dedo pela extremidade mais distante do centro.
+- Mostra uma bolinha branca na ponta estimada.
+- Mostra um contorno azul discreto da regiao detectada.
+- Mantem os marcadores e o tracking da etapa 8.
+- Nao mostra landmarks internos.
 
 ### Importante
-Esta etapa ainda nao implementa rastreamento de mao. O circulo branco representa somente a posicao atual do marcador detectado. O proximo nivel pode usar essa base visual para integrar a mao/finger tracking sem poluir a tela com landmarks.
+Esta e uma primeira camada de hand tracking, ainda nao um rastreador profissional de dedos. A arquitetura foi mantida leve para permitir refinamento nas proximas etapas.
