@@ -172,3 +172,30 @@ typedef struct XrSystemGetInfo {
 #define XR_TYPE_SYSTEM_GET_INFO 4
 #define XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY 1
 #define BANANO_XR_SYSTEM_ID 1
+
+typedef uint32_t XrBool32;
+
+#define XR_TYPE_SYSTEM_PROPERTIES 39
+#define XR_MAX_SYSTEM_NAME_SIZE 256
+#define XR_MIN_COMPOSITION_LAYERS_SUPPORTED 16
+
+typedef struct XrSystemGraphicsProperties {
+    uint32_t maxSwapchainImageHeight;
+    uint32_t maxSwapchainImageWidth;
+    uint32_t maxLayerCount;
+} XrSystemGraphicsProperties;
+
+typedef struct XrSystemTrackingProperties {
+    XrBool32 orientationTracking;
+    XrBool32 positionTracking;
+} XrSystemTrackingProperties;
+
+typedef struct XrSystemProperties {
+    XrStructureType type;
+    void* next;
+    XrSystemId systemId;
+    uint32_t vendorId;
+    char systemName[XR_MAX_SYSTEM_NAME_SIZE];
+    XrSystemGraphicsProperties graphicsProperties;
+    XrSystemTrackingProperties trackingProperties;
+} XrSystemProperties;
