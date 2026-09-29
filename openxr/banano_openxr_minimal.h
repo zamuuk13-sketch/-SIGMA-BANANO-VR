@@ -223,3 +223,20 @@ typedef struct XrSessionCreateInfo {
     XrSessionCreateFlags createFlags;
     XrSystemId systemId;
 } XrSessionCreateInfo;
+
+typedef uint32_t XrSessionState;
+
+#define XR_TYPE_SESSION_BEGIN_INFO 10
+#define XR_SESSION_STATE_IDLE 1
+#define XR_SESSION_STATE_READY 2
+#define XR_SESSION_STATE_SYNCHRONIZED 3
+#define XR_SESSION_STATE_VISIBLE 4
+#define XR_SESSION_STATE_FOCUSED 5
+#define XR_SESSION_STATE_STOPPING 6
+#define XR_SESSION_STATE_EXITING 8
+
+typedef struct XrSessionBeginInfo {
+    XrStructureType type;
+    const void* next;
+    XrViewConfigurationType primaryViewConfigurationType;
+} XrSessionBeginInfo;
