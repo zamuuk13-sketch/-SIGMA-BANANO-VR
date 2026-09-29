@@ -17,6 +17,31 @@ static XrTime BananoNowNs() {
         steady_clock::now().time_since_epoch()).count();
 }
 
+static XrResult BANANO_XR_CALL BananoEndFrame(
+    XrSession session,
+    const XrFrameEndInfo* frameEndInfo) {
+
+    if (!session || !frameEndInfo)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* object = reinterpret_cast<BananoXrSession*>(session);
+    if (!object->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (frameEndInfo->type != XR_TYPE_FRAME_END_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (frameEndInfo->environmentBlendMode != XR_ENVIRONMENT_BLEND_MODE_OPAQUE)
+        return XR_ERROR_ENVIRONMENT_BLEND_MODE_UNSUPPORTED;
+
+    if (frameEndInfo->layerCount > 0 && !frameEndInfo->layers)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    // Etapa 37: aceita o fechamento do frame e a lista de layers.
+    // A composicao grafica real sera ligada ao swapchain nas proximas etapas.
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoWaitFrame(
     XrSession session,
     const XrFrameWaitInfo*,
@@ -765,7 +790,13 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
         return XR_SUCCESS;
     }
 
-    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrWaitFrame") == 0) {
+    if (strcmp(name, "xrGetSystemProperties") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystemProperties);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrGetSystem") == 0) {\n        *function = reinterpret_cast<PFN_xrVoidFunction>(\n            BananoGetSystem);\n        return XR_SUCCESS;\n    }\n\n    if (strcmp(name, "xrEndFrame") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEndFrame);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrWaitFrame") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoWaitFrame);
         return XR_SUCCESS;
