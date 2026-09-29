@@ -99,6 +99,33 @@ static XrResult BANANO_XR_CALL BananoLocateViews(
     return XR_SUCCESS;
 }
 
+static XrResult BANANO_XR_CALL BananoEnumerateReferenceSpaces(
+    XrSession session,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    XrReferenceSpaceType* spaces) {
+
+    if (!session || !countOutput)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* sessionObject =
+        reinterpret_cast<BananoXrSession*>(session);
+    if (!sessionObject->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    *countOutput = 2;
+
+    if (capacityInput == 0 || !spaces)
+        return XR_SUCCESS;
+
+    if (capacityInput < 2)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    spaces[0] = XR_REFERENCE_SPACE_TYPE_VIEW;
+    spaces[1] = XR_REFERENCE_SPACE_TYPE_LOCAL;
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateReferenceSpace(
     XrSession session,
     const XrReferenceSpaceCreateInfo* createInfo,
@@ -1218,6 +1245,12 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrLocateViews") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoLocateViews);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEnumerateReferenceSpaces") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateReferenceSpaces);
         return XR_SUCCESS;
     }
 
