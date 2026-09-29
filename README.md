@@ -1,8 +1,8 @@
 # Banano VR PC
 
-## Etapa 3
+## Etapa 4
 
-Sistema inicial de cadastro e identificacao de marcadores.
+Sistema inicial de mapeamento dos marcadores para controles de VR.
 
 ### Requisitos
 - Windows
@@ -18,11 +18,12 @@ O executavel sera criado em:
 `build/BananoVR.exe`
 
 ### Nesta etapa
-- Cadastro de marcadores com ID unico.
-- Selecao de cor do marcador.
-- Posicao X/Y configuravel.
-- Lista dos marcadores cadastrados.
-- Bloqueio de IDs duplicados.
-- A configuracao de IP e porta da etapa anterior continua disponivel.
+- Marcadores podem ser associados a controles.
+- Controles separados para esquerda e direita.
+- A, B, X e Y.
+- Trigger e Grip.
+- Analógico e click do analógico.
+- Um controle nao pode ser atribuido a dois marcadores ao mesmo tempo.
+- A lista mostra os mapeamentos atuais.
 
-O reconhecimento pela camera e a tolerancia de cor serao adicionados nas proximas etapas.
+O mapeamento nesta etapa ainda e apenas uma configuracao interna. A proxima etapa adicionara calibracao e tolerancia de cor.
