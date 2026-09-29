@@ -1,8 +1,8 @@
 # Banano VR PC
 
-## Etapa 2
+## Etapa 3
 
-Base inicial do aplicativo Banano VR para PC com configuracao basica de conexao.
+Sistema inicial de cadastro e identificacao de marcadores.
 
 ### Requisitos
 - Windows
@@ -18,10 +18,11 @@ O executavel sera criado em:
 `build/BananoVR.exe`
 
 ### Nesta etapa
-- Janela simples do aplicativo.
-- Campo para endereco IP do celular.
-- Campo para porta.
-- Botao para salvar a configuracao.
-- Status basico da configuracao.
+- Cadastro de marcadores com ID unico.
+- Selecao de cor do marcador.
+- Posicao X/Y configuravel.
+- Lista dos marcadores cadastrados.
+- Bloqueio de IDs duplicados.
+- A configuracao de IP e porta da etapa anterior continua disponivel.
 
-A conexao real USB/Wi-Fi e o recebimento de dados serao adicionados nas proximas etapas.
+O reconhecimento pela camera e a tolerancia de cor serao adicionados nas proximas etapas.
