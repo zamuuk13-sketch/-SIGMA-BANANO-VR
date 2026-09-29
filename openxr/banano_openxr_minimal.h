@@ -96,3 +96,18 @@ typedef struct BananoHmdPose {
     float orientationZ;
     float orientationW;
 } BananoHmdPose;
+
+typedef uint32_t XrViewConfigurationType;
+typedef struct XrViewConfigurationView {
+    XrStructureType type;
+    const void* next;
+    uint32_t recommendedImageRectWidth;
+    uint32_t maxImageRectWidth;
+    uint32_t recommendedImageRectHeight;
+    uint32_t maxImageRectHeight;
+    uint32_t recommendedSwapchainSampleCount;
+    uint32_t maxSwapchainSampleCount;
+} XrViewConfigurationView;
+
+#define XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO 2
+#define XR_TYPE_VIEW_CONFIGURATION_VIEW 41
