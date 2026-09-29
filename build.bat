@@ -27,6 +27,18 @@ if errorlevel 1 (
 
 echo [OK] build\BananoVRRuntime.dll criado com sucesso.
 
+echo [BANANO VR] Compilando smoke test OpenXR...
+g++ -std=c++17 -O2 tests\openxr_smoke_test.cpp -o build\BananoVROpenXRTest.exe
+
+if errorlevel 1 (
+    echo.
+    echo [ERRO] Falha ao compilar o smoke test OpenXR.
+    pause
+    exit /b 1
+)
+
+echo [OK] build\BananoVROpenXRTest.exe criado com sucesso.
+
 if errorlevel 1 (
     echo.
     echo [ERRO] Falha na compilacao.
