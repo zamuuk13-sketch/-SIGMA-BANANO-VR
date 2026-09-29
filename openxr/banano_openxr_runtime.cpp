@@ -31,6 +31,33 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetHmdPosition(
     g_hmdPose.positionZ = z;
 }
 
+struct BananoControllerState {
+    bool connected;
+    BananoHmdPose pose;
+};
+
+static BananoControllerState g_leftController{
+    false,
+    { -0.20f, -0.10f, -0.45f, 0.0f, 0.0f, 0.0f, 1.0f }
+};
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerPose(
+    float x, float y, float z, float qx, float qy, float qz, float qw) {
+    g_leftController.connected = true;
+    g_leftController.pose.positionX = x;
+    g_leftController.pose.positionY = y;
+    g_leftController.pose.positionZ = z;
+    g_leftController.pose.orientationX = qx;
+    g_leftController.pose.orientationY = qy;
+    g_leftController.pose.orientationZ = qz;
+    g_leftController.pose.orientationW = qw;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerConnected(
+    int connected) {
+    g_leftController.connected = connected != 0;
+}
+
 static const uint32_t kBananoStereoViewCount = 2;
 static const uint32_t kBananoRecommendedEyeWidth = 1024;
 static const uint32_t kBananoRecommendedEyeHeight = 1024;
