@@ -474,3 +474,8 @@ typedef struct XrEventDataSessionStateChanged {
     XrSessionState state;
     XrTime time;
 } XrEventDataSessionStateChanged;
+
+typedef int32_t XrReferenceSpaceType;
+#define XR_TYPE_REFERENCE_SPACE_CREATE_INFO 37
+#define XR_REFERENCE_SPACE_TYPE_STAGE 3
+#define XR_ERROR_HANDLE_INVALID -12
