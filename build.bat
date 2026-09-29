@@ -15,6 +15,18 @@ echo [BANANO VR] Compilando...
 
 g++ -std=c++17 -O2 -mwindows src\main.cpp src\vr_runtime.cpp -lvfw32 -o build\BananoVR.exe
 
+echo [BANANO VR] Compilando DLL OpenXR...
+g++ -std=c++17 -O2 -shared openxr\banano_openxr_runtime.cpp -o build\BananoVRRuntime.dll
+
+if errorlevel 1 (
+    echo.
+    echo [ERRO] Falha ao compilar a DLL OpenXR.
+    pause
+    exit /b 1
+)
+
+echo [OK] build\BananoVRRuntime.dll criado com sucesso.
+
 if errorlevel 1 (
     echo.
     echo [ERRO] Falha na compilacao.
