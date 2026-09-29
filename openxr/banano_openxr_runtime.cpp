@@ -87,6 +87,63 @@ static XrResult BANANO_XR_CALL BananoEnumerateSwapchainImages(
     return XR_SUCCESS;
 }
 
+struct BananoXrSwapchain {
+    uint32_t magic;
+    XrSession session;
+    int64_t format;
+    uint32_t width;
+    uint32_t height;
+    uint32_t arraySize;
+};
+
+static XrResult BANANO_XR_CALL BananoCreateSwapchain(
+    XrSession session,
+    const XrSwapchainCreateInfo* createInfo,
+    XrSwapchain* swapchain) {
+
+    if (!session || !createInfo || !swapchain)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* sessionObject =
+        reinterpret_cast<BananoXrSession*>(session);
+    if (!sessionObject->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    if (createInfo->type != XR_TYPE_SWAPCHAIN_CREATE_INFO)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    if (createInfo->createFlags != 0 ||
+        (createInfo->usageFlags &
+            ~(XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT |
+              XR_SWAPCHAIN_USAGE_SAMPLED_BIT)) != 0 ||
+        createInfo->format == 0 ||
+        createInfo->sampleCount != 1 ||
+        createInfo->width == 0 ||
+        createInfo->height == 0 ||
+        createInfo->faceCount != 1 ||
+        createInfo->arraySize == 0 ||
+        createInfo->mipCount != 1)
+        return XR_ERROR_FEATURE_UNSUPPORTED;
+
+    if (createInfo->width > kBananoRecommendedEyeWidth ||
+        createInfo->height > kBananoRecommendedEyeHeight)
+        return XR_ERROR_FEATURE_UNSUPPORTED;
+
+    BananoXrSwapchain* object = new (std::nothrow) BananoXrSwapchain{};
+    if (!object)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    object->magic = 0x53574348;
+    object->session = session;
+    object->format = createInfo->format;
+    object->width = createInfo->width;
+    object->height = createInfo->height;
+    object->arraySize = createInfo->arraySize;
+
+    *swapchain = reinterpret_cast<XrSwapchain>(object);
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoEndFrame(
     XrSession session,
     const XrFrameEndInfo* frameEndInfo) {
@@ -869,6 +926,12 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrEnumerateSwapchainImages") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoEnumerateSwapchainImages);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrCreateSwapchain") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoCreateSwapchain);
         return XR_SUCCESS;
     }
 
