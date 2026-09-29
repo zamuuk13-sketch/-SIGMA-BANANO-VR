@@ -32,46 +32,6 @@ extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetHmdPosition(
     g_hmdPose.positionZ = z;
 }
 
-static void BananoNormalizeQuaternion(BananoHmdPose& pose) {
-    const float lengthSquared =
-        pose.orientationX * pose.orientationX +
-        pose.orientationY * pose.orientationY +
-        pose.orientationZ * pose.orientationZ +
-        pose.orientationW * pose.orientationW;
-
-    if (lengthSquared <= 0.000001f) {
-        pose.orientationX = 0.0f;
-        pose.orientationY = 0.0f;
-        pose.orientationZ = 0.0f;
-        pose.orientationW = 1.0f;
-        return;
-    }
-
-    const float inverseLength = 1.0f / std::sqrt(lengthSquared);
-    pose.orientationX *= inverseLength;
-    pose.orientationY *= inverseLength;
-    pose.orientationZ *= inverseLength;
-    pose.orientationW *= inverseLength;
-}
-
-extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerOrientation(
-    float qx, float qy, float qz, float qw) {
-    g_leftController.pose.orientationX = qx;
-    g_leftController.pose.orientationY = qy;
-    g_leftController.pose.orientationZ = qz;
-    g_leftController.pose.orientationW = qw;
-    BananoNormalizeQuaternion(g_leftController.pose);
-}
-
-extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetRightControllerOrientation(
-    float qx, float qy, float qz, float qw) {
-    g_rightController.pose.orientationX = qx;
-    g_rightController.pose.orientationY = qy;
-    g_rightController.pose.orientationZ = qz;
-    g_rightController.pose.orientationW = qw;
-    BananoNormalizeQuaternion(g_rightController.pose);
-}
-
 struct BananoControllerState {
     bool connected;
     BananoHmdPose pose;
@@ -180,6 +140,48 @@ static BananoControllerState g_rightController{
     false,
     { 0.20f, -0.10f, -0.45f, 0.0f, 0.0f, 0.0f, 1.0f }
 };
+
+
+static void BananoNormalizeQuaternion(BananoHmdPose& pose) {
+    const float lengthSquared =
+        pose.orientationX * pose.orientationX +
+        pose.orientationY * pose.orientationY +
+        pose.orientationZ * pose.orientationZ +
+        pose.orientationW * pose.orientationW;
+
+    if (lengthSquared <= 0.000001f) {
+        pose.orientationX = 0.0f;
+        pose.orientationY = 0.0f;
+        pose.orientationZ = 0.0f;
+        pose.orientationW = 1.0f;
+        return;
+    }
+
+    const float inverseLength = 1.0f / std::sqrt(lengthSquared);
+    pose.orientationX *= inverseLength;
+    pose.orientationY *= inverseLength;
+    pose.orientationZ *= inverseLength;
+    pose.orientationW *= inverseLength;
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetLeftControllerOrientation(
+    float qx, float qy, float qz, float qw) {
+    g_leftController.pose.orientationX = qx;
+    g_leftController.pose.orientationY = qy;
+    g_leftController.pose.orientationZ = qz;
+    g_leftController.pose.orientationW = qw;
+    BananoNormalizeQuaternion(g_leftController.pose);
+}
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetRightControllerOrientation(
+    float qx, float qy, float qz, float qw) {
+    g_rightController.pose.orientationX = qx;
+    g_rightController.pose.orientationY = qy;
+    g_rightController.pose.orientationZ = qz;
+    g_rightController.pose.orientationW = qw;
+    BananoNormalizeQuaternion(g_rightController.pose);
+}
+
 
 extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeSetRightControllerPose(
     float x, float y, float z, float qx, float qy, float qz, float qw) {
