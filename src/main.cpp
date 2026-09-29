@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
-#include <cmath>
+#include <cmath>\n#include <algorithm>
 #pragma comment(lib, "vfw32.lib")
 
 #define IDC_IP 101
@@ -63,7 +63,7 @@ static int g_colorTolerance = 30;
 static int g_positionToleranceValue = 20;
 static bool g_cameraRunning = false;
 static int g_cameraWidth = 640;
-static int g_cameraHeight = 480;
+static int g_cameraHeight = 480;\nstatic std::vector<Detection> g_trackedDetections;
 
 static const char* kControls[] = {
     "Esquerdo: A", "Esquerdo: B", "Esquerdo: X", "Esquerdo: Y",
@@ -230,7 +230,7 @@ static void StopCamera() {
     DestroyWindow(g_camera);
     g_camera = nullptr;
     g_cameraRunning = false;
-    g_detections.clear();
+    g_detections.clear();\n    g_trackedDetections.clear();
     InvalidateRect(g_mainWindow, nullptr, FALSE);
     SetStatus("Status: camera parada.");
 }
@@ -241,7 +241,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         g_mainWindow = hwnd;
         HFONT font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-        CreateWindowA("STATIC", "Banano VR PC - Etapa 6",
+        CreateWindowA("STATIC", "Banano VR PC - Etapa 7",
             WS_CHILD | WS_VISIBLE, 20, 15, 380, 25, hwnd, nullptr, nullptr, nullptr);
 
         CreateWindowA("STATIC", "IP do celular:",
