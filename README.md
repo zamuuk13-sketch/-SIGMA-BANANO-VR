@@ -1,12 +1,13 @@
 # Banano VR PC
 
-## Etapa 5
+## Etapa 6
 
-Sistema inicial de calibracao para os marcadores.
+Primeiro visualizador e rastreador de camera do Banano VR.
 
 ### Requisitos
 - Windows
 - MinGW-w64 com `g++` no PATH
+- Webcam/camera disponivel no Windows
 
 ### Compilar
 Execute:
@@ -18,11 +19,13 @@ O executavel sera criado em:
 `build/BananoVR.exe`
 
 ### Nesta etapa
-- Tolerancia de cor configuravel de 0 a 100.
-- Tolerancia de posicao configuravel de 0 a 100.
-- Botao para aplicar a calibracao.
-- A tolerancia de cor sera usada posteriormente para reconhecer cores aproximadas, sem exigir RGB exato.
-- A tolerancia de posicao sera usada posteriormente para ajudar a diferenciar marcadores da mesma cor pela posicao/layout.
-- O cadastro e o mapeamento dos marcadores da etapa anterior continuam funcionando.
+- Visualizador simples da camera no aplicativo.
+- Botao para iniciar/parar a camera.
+- Deteccao inicial por cor usando tolerancia configurada.
+- O programa procura Azul, Vermelho, Amarelo, Verde, Roxo, Laranja e Branco.
+- Marcadores detectados recebem um contorno branco na visualizacao.
+- O processamento usa amostragem leve para manter a etapa simples e sem bibliotecas externas de visao computacional.
+- A calibracao da etapa 5 continua controlando a tolerancia de cor.
 
-A camera ainda nao e processada nesta etapa. O reconhecimento real dos marcadores sera adicionado na etapa de tracking.
+### Importante
+Esta ainda e uma primeira camada de deteccao. Ela nao faz tracking de mao, nao envia dados para o celular e ainda nao transforma a deteccao em controles VR reais. Essas partes entram nas proximas etapas.
