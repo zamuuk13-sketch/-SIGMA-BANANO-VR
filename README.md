@@ -1,8 +1,8 @@
 # Banano VR PC
 
-## Etapa 4
+## Etapa 5
 
-Sistema inicial de mapeamento dos marcadores para controles de VR.
+Sistema inicial de calibracao para os marcadores.
 
 ### Requisitos
 - Windows
@@ -18,12 +18,11 @@ O executavel sera criado em:
 `build/BananoVR.exe`
 
 ### Nesta etapa
-- Marcadores podem ser associados a controles.
-- Controles separados para esquerda e direita.
-- A, B, X e Y.
-- Trigger e Grip.
-- Analógico e click do analógico.
-- Um controle nao pode ser atribuido a dois marcadores ao mesmo tempo.
-- A lista mostra os mapeamentos atuais.
+- Tolerancia de cor configuravel de 0 a 100.
+- Tolerancia de posicao configuravel de 0 a 100.
+- Botao para aplicar a calibracao.
+- A tolerancia de cor sera usada posteriormente para reconhecer cores aproximadas, sem exigir RGB exato.
+- A tolerancia de posicao sera usada posteriormente para ajudar a diferenciar marcadores da mesma cor pela posicao/layout.
+- O cadastro e o mapeamento dos marcadores da etapa anterior continuam funcionando.
 
-O mapeamento nesta etapa ainda e apenas uma configuracao interna. A proxima etapa adicionara calibracao e tolerancia de cor.
+A camera ainda nao e processada nesta etapa. O reconhecimento real dos marcadores sera adicionado na etapa de tracking.
