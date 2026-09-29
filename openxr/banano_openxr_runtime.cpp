@@ -89,6 +89,76 @@ static BananoInputEvent g_lastInputEvent{
     false
 };
 
+enum class BananoMarkerControl {
+    None = -1,
+    LeftA = 0,
+    LeftB = 1,
+    LeftX = 2,
+    LeftY = 3,
+    LeftTrigger = 4,
+    LeftGrip = 5,
+    LeftThumbstick = 6,
+    LeftThumbstickClick = 7,
+    RightA = 8,
+    RightB = 9,
+    RightX = 10,
+    RightY = 11,
+    RightTrigger = 12,
+    RightGrip = 13,
+    RightThumbstick = 14,
+    RightThumbstickClick = 15
+};
+
+struct BananoMarkerBinding {
+    int markerId;
+    BananoMarkerControl control;
+};
+
+static constexpr int BANANO_MAX_MARKER_BINDINGS = 64;
+static BananoMarkerBinding g_markerBindings[BANANO_MAX_MARKER_BINDINGS]{};
+static int g_markerBindingCount = 0;
+
+extern "C" BANANO_EXPORT void BANANO_XR_CALL BananoVRRuntimeClearMarkerBindings() {
+    g_markerBindingCount = 0;
+}
+
+extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeBindMarker(
+    int markerId, int control) {
+    if (markerId <= 0 ||
+        control < static_cast<int>(BananoMarkerControl::LeftA) ||
+        control > static_cast<int>(BananoMarkerControl::RightThumbstickClick)) {
+        return 0;
+    }
+
+    for (int i = 0; i < g_markerBindingCount; ++i) {
+        if (g_markerBindings[i].markerId == markerId ||
+            static_cast<int>(g_markerBindings[i].control) == control) {
+            return 0;
+        }
+    }
+
+    if (g_markerBindingCount >= BANANO_MAX_MARKER_BINDINGS)
+        return 0;
+
+    g_markerBindings[g_markerBindingCount++] = {
+        markerId,
+        static_cast<BananoMarkerControl>(control)
+    };
+    return 1;
+}
+
+static BananoMarkerControl BananoFindMarkerControl(int markerId) {
+    for (int i = 0; i < g_markerBindingCount; ++i) {
+        if (g_markerBindings[i].markerId == markerId)
+            return g_markerBindings[i].control;
+    }
+    return BananoMarkerControl::None;
+}
+
+extern "C" BANANO_EXPORT int BANANO_XR_CALL BananoVRRuntimeGetMarkerControl(int markerId) {
+    return static_cast<int>(BananoFindMarkerControl(markerId));
+}
+
 static void BananoPublishInputEvent(
     int controller,
     BananoInputKind kind,
