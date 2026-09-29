@@ -1,8 +1,8 @@
 # Banano VR PC
 
-## Etapa 6
+## Etapa 7
 
-Primeiro visualizador e rastreador de camera do Banano VR.
+Identificacao e estabilizacao inicial dos marcadores detectados.
 
 ### Requisitos
 - Windows
@@ -19,13 +19,12 @@ O executavel sera criado em:
 `build/BananoVR.exe`
 
 ### Nesta etapa
-- Visualizador simples da camera no aplicativo.
-- Botao para iniciar/parar a camera.
-- Deteccao inicial por cor usando a tolerancia configurada.
-- O programa procura Azul, Vermelho, Amarelo, Verde, Roxo, Laranja e Branco.
-- A tela mostra quantos marcadores coloridos foram encontrados.
-- O processamento usa amostragem leve para manter a etapa simples e sem bibliotecas externas de visao computacional.
-- A calibracao da etapa 5 continua controlando a tolerancia de cor.
+- Cada deteccao tenta encontrar seu marcador cadastrado pelo ID.
+- A cor continua sendo usada como primeira identificacao.
+- A posicao X/Y cadastrada ajuda a diferenciar dois marcadores da mesma cor.
+- O sistema aplica uma suavizacao simples para reduzir pequenas tremidas entre frames.
+- A tela informa quantos marcadores foram encontrados e quantos receberam ID.
+- A camera e a calibracao da etapa anterior continuam funcionando.
 
 ### Importante
-Esta ainda e uma primeira camada de deteccao. Ela nao faz tracking de mao, nao envia dados para o celular e ainda nao transforma a deteccao em controles VR reais. A proxima evolucao pode adicionar a visualizacao dos pontos/bolas detectados e a identificacao por ID/posicao.
+O sistema ainda nao faz rastreamento de mao nem envia controles para jogos. Esta etapa prepara a identificacao estavel dos marcadores para o proximo nivel de tracking.
