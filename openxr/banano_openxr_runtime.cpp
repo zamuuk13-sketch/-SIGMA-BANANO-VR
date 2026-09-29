@@ -189,6 +189,34 @@ static XrResult BANANO_XR_CALL BananoLocateSpace(
     return XR_SUCCESS;
 }
 
+static XrResult BANANO_XR_CALL BananoEnumerateSwapchainFormats(
+    XrSession session,
+    uint32_t capacityInput,
+    uint32_t* countOutput,
+    int64_t* formats) {
+
+    if (!session || !countOutput)
+        return XR_ERROR_RUNTIME_FAILURE;
+
+    BananoXrSession* sessionObject =
+        reinterpret_cast<BananoXrSession*>(session);
+    if (!sessionObject->running)
+        return XR_ERROR_SESSION_NOT_RUNNING;
+
+    // Etapa 44: formato RGBA8 como formato inicial do runtime.
+    constexpr int64_t kBananoRgba8Format = 37;
+    *countOutput = 1;
+
+    if (capacityInput == 0 || !formats)
+        return XR_SUCCESS;
+
+    if (capacityInput < 1)
+        return XR_ERROR_SIZE_INSUFFICIENT;
+
+    formats[0] = kBananoRgba8Format;
+    return XR_SUCCESS;
+}
+
 static XrResult BANANO_XR_CALL BananoCreateSwapchain(
     XrSession session,
     const XrSwapchainCreateInfo* info,
@@ -1263,6 +1291,12 @@ static XrResult BANANO_XR_CALL BananoGetInstanceProcAddr(
     if (strcmp(name, "xrLocateSpace") == 0) {
         *function = reinterpret_cast<PFN_xrVoidFunction>(
             BananoLocateSpace);
+        return XR_SUCCESS;
+    }
+
+    if (strcmp(name, "xrEnumerateSwapchainFormats") == 0) {
+        *function = reinterpret_cast<PFN_xrVoidFunction>(
+            BananoEnumerateSwapchainFormats);
         return XR_SUCCESS;
     }
 
