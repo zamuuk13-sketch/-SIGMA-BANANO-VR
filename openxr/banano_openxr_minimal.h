@@ -283,3 +283,27 @@ typedef struct XrFrameEndInfo {
     uint32_t layerCount;
     const void* const* layers;
 } XrFrameEndInfo;
+
+typedef struct XrSwapchain_T* XrSwapchain;
+typedef uint32_t XrSwapchainUsageFlags;
+typedef XrFlags64 XrSwapchainCreateFlags;
+
+#define XR_TYPE_SWAPCHAIN_CREATE_INFO 9
+#define XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT 0x00000010
+#define XR_SWAPCHAIN_USAGE_SAMPLED_BIT 0x00000001
+#define XR_SWAPCHAIN_CREATE_STATIC_IMAGE_BIT 0x00000002
+#define XR_SWAPCHAIN_FORMAT_R8G8B8A8 43
+
+typedef struct XrSwapchainCreateInfo {
+    XrStructureType type;
+    const void* next;
+    XrSwapchainCreateFlags createFlags;
+    XrSwapchainUsageFlags usageFlags;
+    int64_t format;
+    uint32_t sampleCount;
+    uint32_t width;
+    uint32_t height;
+    uint32_t faceCount;
+    uint32_t arraySize;
+    uint32_t mipCount;
+} XrSwapchainCreateInfo;
